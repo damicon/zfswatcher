@@ -1,0 +1,66 @@
+	<dl class="dl-horizontal">
+		<dt>name:</dt><dd>{{ .Name }}</dd>
+		<dt>state:</dt><dd class="{{ .StateClass }}">{{ .State }}</dd>
+		{{ if .Status }}
+		<dt>status:</dt><dd>{{ .Status }}</dd>
+		{{ end }}
+		{{ if .Action }}
+		<dt>action:</dt><dd>{{ .Action }}</dd>
+		{{ end }}
+		{{ if .See }}
+		<dt>see:</dt><dd><a href="{{ .See }}" target="_blank">{{ .See }}</a></dd>
+		{{ end }}
+		{{ if .Scan }}
+		<dt>scan:</dt><dd>{{ .Scan }}</dd>
+		{{ end }}
+	</dl>
+	<table class="table table-condensed table-hover">
+		<thead>
+			<tr>
+				<th style="width: 30%">Name</th>
+				<th style="width: 4%">Loc</th>
+				<th style="width: 15%">State</th>
+				<th style="text-align: right; width: 8%">Read</th>
+				<th style="text-align: right; width: 8%">Write</th>
+				<th style="text-align: right; width: 8%">Cksum</th>
+				<th style="width: 31%"></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{ range .Devs }}
+			<tr>
+				<td style="padding-left: {{ .Indent }}em">{{ .Name }}</td>
+				<td>
+				{{ if .EnableLed }}
+					<form action="/locate/" method="post" style="margin-bottom: -1px; margin-top: -1px">
+					{{ if .Locate }}
+					<input type="hidden" name="dev" value="{{ .Name }}">
+					<input type="hidden" name="state" value="off">
+					<button type="submit" class="btn btn-mini btn-warning">
+					☼
+					</button>
+					{{ else }}
+					<input type="hidden" name="dev" value="{{ .Name }}">
+					<input type="hidden" name="state" value="on">
+					<button type="submit" class="btn btn-mini">
+					☀
+					</button>
+					{{ end }}
+					</form>
+				{{ end }}
+				</td>
+				<td class="{{ .StateClass }}">{{ .State }}</td>
+				<td style="text-align: right">{{ nicenumber .Read }}</td>
+				<td style="text-align: right">{{ nicenumber .Write }}</td>
+				<td style="text-align: right">{{ nicenumber .Cksum }}</td>
+				<td style="">{{ .Rest }}</td>
+			</tr>
+			{{ end }}
+		</tbody>
+	</table>
+
+	<dl class="dl-horizontal">
+		{{ if .Errors }}
+		<dt>errors:</dt><dd>{{ .Errors }}</dd>
+		{{ end }}
+	</dl>

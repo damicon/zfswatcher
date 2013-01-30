@@ -1,0 +1,13 @@
+{{ template "header.html" .Nav }}
+
+<ul class="nav nav-tabs">
+{{ range .SubNav }}
+	<li{{ if .Active }} class="active"{{ end }}>
+	<a href="/status/{{ .Name }}">{{ .Name }}</a>
+	</li>
+{{ end }}
+</ul>
+
+{{ template "status-pool.html" .Data }}
+
+{{ template "footer.html" .Nav }}

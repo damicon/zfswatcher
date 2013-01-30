@@ -1,0 +1,19 @@
+- udev trigger led update?
+- configurable device read/write/cksum error thresholds
+- alert about pool space nearly full (with configurable thresholds)
+- ubuntu upstart script
+- persist state
+- debian package
+- web interface: remove unused javascripts
+- web interface: iostats
+- web interface: user access levels?
+- internal led control (replace ledctl)
+- notification output to programs (for example to send snmp traps)
+- hot spare replace, automagic?
+   https://github.com/zfsonlinux/zfs/issues/250     workaround: remove, replace
+- configurable severity for parse errors etc.
+- function for sending test notification at desired level
+- documentation
+  - general usage
+  - build & installation
+- lots of cleanup & refactoring :)

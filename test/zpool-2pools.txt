@@ -1,0 +1,46 @@
+  pool: tank
+ state: ONLINE
+ scan: none requested
+config:
+
+	NAME                        STATE     READ WRITE CKSUM
+	tank                        ONLINE       0     0     0
+	  mirror-0                  ONLINE       0     0     0
+	    scsi-3500000e01a0fc9f0  ONLINE       0     0     0
+	    scsi-3500000e014bb4140  ONLINE       0     0     0
+	  mirror-1                  ONLINE       0     0     0
+	    scsi-3500000e015060e90  ONLINE       0     0     0
+	    scsi-3500000e014d72a30  ONLINE       0     0     0
+	  mirror-2                  ONLINE       0     0     0
+	    scsi-3500000e014fefc20  ONLINE       0     0     0
+	    scsi-3500000e01594c2a0  ONLINE       0     0     0
+	  mirror-3                  ONLINE       0     0     0
+	    scsi-3500000e01519b340  ONLINE       0     0     0
+	    scsi-3500000e01594bd90  ONLINE       0     0     0
+	  mirror-4                  ONLINE       0     0     0
+	    scsi-35000c500031e1ef3  ONLINE       0     0     0
+	    scsi-3500000e015193820  ONLINE       0     0     0
+	  mirror-5                  ONLINE       0     0     0
+	    scsi-3500000e0142e78c0  ONLINE       0     0     0
+	    scsi-3500000e01675d620  ONLINE       0     0     0
+	  mirror-6                  ONLINE       0     0     0
+	    scsi-3500000e01aff8fd0  ONLINE       0     0     0
+	    scsi-35000c500031e54f3  ONLINE       0     0     0
+	  mirror-7                  ONLINE       0     0     0
+	    scsi-3500000e015904b30  ONLINE       0     0     0
+	    scsi-3500000e015949b60  ONLINE       0     0     0
+	logs
+	  sdc                       ONLINE       0     0     0
+
+errors: No known data errors
+
+  pool: vmstore
+ state: ONLINE
+ scan: none requested
+config:
+
+	NAME        STATE     READ WRITE CKSUM
+	vmstore     ONLINE       0     0     0
+	  sdt       ONLINE       0     0     0
+
+errors: No known data errors

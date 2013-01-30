@@ -1,0 +1,50 @@
+{{ template "header.html" .Nav }}
+
+{{ with .Data }}
+	<dl class="dl-horizontal">
+		<dt>load averages:</dt><dd>{{ index .SysLoadaverage 0 | printf "%.2f" }}, {{ index .SysLoadaverage 1 | printf "%.2f" }}, {{ index .SysLoadaverage 2 | printf "%.2f" }}
+		<dt>system uptime:</dt><dd>{{ .SysUptime }}</dd>
+		<dt>zfswatcher uptime:</dt><dd>{{ .ZfswatcherUptime }}</dd>
+	</dl>
+	<table class="table table-hover">
+		<thead>
+			<tr>
+				<th style="width: 10%">Pool</th>
+				<th style="width: 10%">State</th>
+				<th style="text-align: right; width: 8%">Total</th>
+				<th style="text-align: right; width: 8%">Used</th>
+				<th style="text-align: right; width: 5%">%</th>
+				<th style="text-align: right; width: 8%">Avail</th>
+				<th style="text-align: right; width: 5%">%</th>
+				<th style="width: 15%"></th>
+				<th style="width: 31%"></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{ range .Pools }}
+			<tr>
+				<td><a href="/status/{{ .Name }}">{{ .Name }}</a></td>
+				<td class="{{ .StateClass }}">{{ .State }}</td>
+				<td style="text-align: right">{{ nicenumber .Total }}</td>
+				<td style="text-align: right">{{ nicenumber .Used }}</td>
+				<td style="text-align: right">{{ .UsedPercent }}</td>
+				<td style="text-align: right">{{ nicenumber .Avail }}</td>
+				<td style="text-align: right">{{ .AvailPercent }}</td>
+				<td style="padding-left: 2em">
+					<a href="/usage/{{ .Name }}">
+					<div class="progress">
+					{{ if .UsedPercent }}
+						<div class="bar bar-warning" style="width: {{ .UsedPercent }}"></div>
+						<div class="bar bar-success" style="width: {{ .AvailPercent }}"></div>
+					{{ end }}
+					</div>
+					</a>
+				</td>
+				<td></td>
+			</tr>
+			{{ end }}
+		</tbody>
+	</table>
+{{ end }}
+
+{{ template "footer.html" .Nav }}

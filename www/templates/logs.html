@@ -1,0 +1,35 @@
+{{ template "header.html" .Nav }}
+
+<table class="table table-hover">
+	<thead>
+		<tr>
+			<th style="width: 10em">Time</th>
+			<th style="width: 7em">Severity</th>
+			<th>Message</th>
+		</tr>
+	</thead>
+	<tbody>
+		{{ range $n, $d := .Data }}
+		<tr class="{{ $d.Class }}">
+			<td>{{ $d.Time }}</td>
+			<td>{{ $d.Severity }}</td>
+			<td>{{ $d.Text }}
+				{{ if $d.Attachment }}
+				<button class="btn btn-mini pull-right"
+					type="button"
+					data-toggle="collapse"
+					data-target="#attachment-{{ $n }}">
+					View attachment
+				</button>
+				<div id="attachment-{{ $n }}"
+					class="collapse">
+					<pre>{{ $d.Attachment }}</pre>
+				</div>
+				{{ end }}
+			</td>
+		</tr>
+		{{ end }}
+	</tbody>
+</table>
+
+{{ template "footer.html" .Nav }}

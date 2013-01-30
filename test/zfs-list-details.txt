@@ -1,0 +1,5 @@
+tank	155G	380G	100M	154G	0	227G	154G	/tank
+tank@snaptest	-	100M	-	-	-	-	20.1G	-
+tank/test-8k	157G	103G	0	101G	1.72G	0	101G	-
+tank/xfs	258G	123G	165K	20.1G	103G	0	20.1G	-
+tank/xfs@backup	-	165K	-	-	-	-	20.1G	-

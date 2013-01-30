@@ -1,0 +1,37 @@
+{{ template "header.html" .Nav }}
+
+<table class="table table-condensed table-hover">
+	<thead>
+		<tr>
+			<th style="width: 16%; vertical-align: top" rowspan="2">Name</th>
+			<th style="width: 8%; text-align: right; vertical-align: top" rowspan="2">Avail</th>
+			<th style="width: 8%; text-align: right; vertical-align: top" rowspan="2">Used</th>
+			<th style="width: 8%; text-align: center" colspan="4">Used by</th>
+			<th style="width: 8%; text-align: right; vertical-align: top" rowspan="2">Refer</th>
+			<th style="width: 28%; padding-left: 2em; vertical-align: top" rowspan="2">Mount point</th>
+		</tr>
+		<tr>
+			<th style="width: 8%; text-align: right">snap</th>
+			<th style="width: 8%; text-align: right">dataset</th>
+			<th style="width: 8%; text-align: right">refreservation</th>
+			<th style="width: 8%; text-align: right">child</th>
+		</tr>
+	</thead>
+	<tbody>
+		{{ range .Data }}
+		<tr>
+			<td>{{ .Name }}</td>
+			<td style="text-align: right">{{ nicenumber .Avail }}</td>
+			<td style="text-align: right">{{ nicenumber .Used }}</td>
+			<td style="text-align: right">{{ nicenumber .Usedsnap }}</td>
+			<td style="text-align: right">{{ nicenumber .Usedds }}</td>
+			<td style="text-align: right">{{ nicenumber .Usedrefreserv }}</td>
+			<td style="text-align: right">{{ nicenumber .Usedchild }}</td>
+			<td style="text-align: right">{{ nicenumber .Refer }}</td>
+			<td style="padding-left: 2em">{{ .Mountpoint }}</td>
+		</tr>
+		{{ end }}
+	</tbody>
+</table>
+
+{{ template "footer.html" .Nav }}

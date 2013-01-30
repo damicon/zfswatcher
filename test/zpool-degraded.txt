@@ -1,0 +1,25 @@
+  pool: test
+ state: DEGRADED
+status: One or more devices could not be used because the label is missing or
+	invalid.  Sufficient replicas exist for the pool to continue
+	functioning in a degraded state.
+action: Replace the device using 'zpool replace'.
+   see: http://zfsonlinux.org/msg/ZFS-8000-4J
+ scan: resilvered 674M in 0h3m with 0 errors on Tue Dec 18 00:19:59 2012
+config:
+
+	NAME        STATE     READ WRITE CKSUM
+	test        DEGRADED     0     0     0
+	  raidz3-0  DEGRADED     0     0     0
+	    B0      UNAVAIL      0     0     0
+	    A1      ONLINE       0     0     0
+	    A2      ONLINE       0     0     0
+	    A3      ONLINE       0     0     0
+	    A4      ONLINE       0     0     0
+	    A5      ONLINE       0     0     0
+	    A6      ONLINE       0     0     0
+	spares
+	  B1        UNAVAIL 
+	  B2        UNAVAIL 
+
+errors: No known data errors
