@@ -107,8 +107,8 @@ Edit the configuration file:
 
     editor /etc/zfs/zfswatcher.conf
 
-If you change the default web templates, it is best to copy them to
-another location from `/usr/local/share/zfswatcher/www` and change
+If you change the default web templates, it is best to copy them
+from `/usr/local/share/zfswatcher/www` to another location and change
 the `templatedir` and `resourcedir` settings in the configuration
 accordingly. This way your local changes will not be overwritten if you
 upgrade the zfswatcher package at a later time.
