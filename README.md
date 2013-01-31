@@ -45,7 +45,8 @@ at the following URL:
 
 http://golang.org/doc/install
 
-The version 1.0.3 of the Go programming language is recommended.
+The version 1.0.3 of the Go programming language on 64 bit platform
+is recommended.
 
 The software has been developed on Debian 6.0 (squeeze) and Ubuntu 12.04
 (precise) but it should work fine on other Linux distributions.
@@ -56,8 +57,8 @@ Minor modifications are currently required if running on other platforms.
 Compiling
 ---------
 
-Optionally edit the Makefile to set the installation directories and
-other options.
+Optionally edit the Makefile to set the installation directories.
+Then run:
 
     make
 
@@ -65,16 +66,19 @@ other options.
 Installation
 ------------
 
+If you are upgrading an existing installation you should probably just
+copy the zfswatcher binary manually. If this is a fresh installation or
+you want to replace all customizations with defaults, you can run:
+
     make install
 
 
 Configuration
 -------------
 
-Edit the configuration file which is installed by default at the following
-location:
+Edit the configuration file:
 
-    /etc/zfs/zfswatcher.conf
+    editor /etc/zfs/zfswatcher.conf
 
 
 Support
