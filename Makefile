@@ -19,16 +19,32 @@
 # along with zfswatcher. If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Go tool.
+SHELL = /bin/sh
+
+# Go tool:
 GO=go
 
-# Go library path.
+# Go library path:
 GOPATH=`pwd`/golibs
 
-# Rules.
+# Rules:
 all: zfswatcher
 
 zfswatcher: zfswatcher.go leds.go util.go webserver.go
-	GOPATH=$(GOPATH) $(GO) build
+	GOPATH=$(GOPATH) $(GO) build -o $@
+
+clean: 
+	GOPATH=$(GOPATH) $(GO) clean
+	rm -f zfswatcher
+
+install: zfswatcher
+	install -d $(DESTDIR)/usr/sbin $(DESTDIR)/etc/zfs \
+		$(DESTDIR)/usr/share/zfswatcher
+	install -c zfswatcher $(DESTDIR)/usr/sbin/zfswatcher
+	install -c -m 644 etc/zfswatcher.conf $(DESTDIR)/etc/zfs/zfswatcher.conf
+	cp -R www $(DESTDIR)/usr/share/zfswatcher/www
+
+deb:
+	dpkg-buildpackage -b -uc -tc
 
 # eof

@@ -1,0 +1,18 @@
+Source: zfswatcher
+Section: utils
+Priority: extra
+Maintainer: Janne Snabb <snabb@epipe.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.3
+Homepage: http://zfswatcher.damicon.fi/
+
+Package: zfswatcher
+Architecture: amd64
+Depends: zfs, ${shlibs:Depends}, ${misc:Depends}
+Description: ZFS pool monitoring and notification daemon
+ Zfswatcher is a ZFS pool monitoring and notification daemon
+ with the following features:
+  * Periodically inspects the zpool status.
+  * Sends configurable notifications on status changes.
+  * Controls the disk enclosure LEDs.
+  * Web interface for displaying status and logs.

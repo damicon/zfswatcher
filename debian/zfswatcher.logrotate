@@ -1,0 +1,12 @@
+/var/lib/zfswatcher.log
+{
+	rotate 7
+	daily
+	missingok
+	notifempty
+	compress
+	delaycompress
+	postrotate
+		start-stop-daemon -K -p /var/run/zfswatcher.pid -s HUP -x /usr/sbin/zfswatcher -q
+	endscript
+}
