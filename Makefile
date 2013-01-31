@@ -41,7 +41,9 @@ install: zfswatcher
 	install -d $(DESTDIR)/usr/sbin $(DESTDIR)/etc/zfs \
 		$(DESTDIR)/usr/share/zfswatcher
 	install -c zfswatcher $(DESTDIR)/usr/sbin/zfswatcher
-	install -c -m 644 etc/zfswatcher.conf $(DESTDIR)/etc/zfs/zfswatcher.conf
+	test -e $(DESTDIR)/etc/zfs/zfswatcher.conf \
+		|| install -c -m 644 etc/zfswatcher.conf \
+			$(DESTDIR)/etc/zfs/zfswatcher.conf
 	cp -R www $(DESTDIR)/usr/share/zfswatcher/www
 
 deb:
