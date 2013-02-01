@@ -647,7 +647,7 @@ func setup() {
 	// command line flags:
 	cfgFile := pflag.StringP("conf", "c", CFGFILE, "configuration file path")
 	optDebug = pflag.BoolP("debug", "d", false, "print debug information to stdout")
-	optHashPassword := pflag.BoolP("passwordhash", "p", false, "hash web password")
+	optHashPassword := pflag.BoolP("passwordhash", "P", false, "hash web password")
 	optTest := pflag.BoolP("test", "t", false, "test configuration and exit")
 	optVersion := pflag.BoolP("version", "v", false, "print version information and exit")
 
