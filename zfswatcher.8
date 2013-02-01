@@ -1,0 +1,80 @@
+.\"-
+.\" zfswatcher.8
+.\"
+.\" Copyright © 2012-2013 Damicon Kraa Oy
+.\"
+.\" This file is part of zfswatcher.
+.\"
+.\" Zfswatcher is free software: you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation, either version 3 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" Zfswatcher is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with zfswatcher. If not, see <http://www.gnu.org/licenses/>.
+.\"
+.TH ZFSWATCHER 8 "2013-02-01" "version 0.01"
+.SH NAME
+zfswatcher \- ZFS pool monitoring and notification daemon
+.SH SYNOPSIS
+.B zfswatcher
+.RB [\| \-c
+.IR config-file \|]
+.RB [\| \-d \|]
+.RB [\| \-P \|]
+.RB [\| \-t \|]
+.RB [\| \-v \|]
+.SH DESCRIPTION
+The
+.B zfswatcher
+daemon periodically checks the ZFS pool status and sends notifications
+about any changes according to the configuration settings. It also controls
+the disk enclosure LEDs and provides a web interface for viewing the ZFS
+status and logs.
+.SH OPTIONS
+.TP
+.BR \-c ", " \-\-conf " \fIconfig-file\fR"
+Use an alternate
+.I config-file
+instead of
+.IR /etc/zfs/zfswatcher.conf .
+.TP
+.BR \-d ", " \-\-debug
+Enable debug mode which outputs all messages to STDOUT.
+.TP
+.BR \-P ", " \-\-passwordhash
+Read a password and print a hashed password. This can be useful when
+setting up the configuration files.
+.TP
+.BR \-t ", " \-\-test
+Test the configuration file syntax and exit.
+.TP
+.BR \-v ", " \-\-version
+Print version information and exit.
+.SH SIGNALS
+.TP
+.B SIGHUP
+Close and re-open the output log. Use in case you want to rotate
+the log file.
+.TP
+.BR SIGTERM ", " SIGINT
+Terminate gracefully.
+.SH EXIT STATUS
+The daemon exits 0 on success, and >0 if an error occurs.
+.SH FILES
+.TP
+.B /etc/zfs/zfswatcher.conf
+Default configuration file.
+.SH SEE ALSO
+.BR zfs (8),
+.BR zpool (8),
+.ie !d pdfhref \
+http://zfswatcher.damicon.fi/
+.el \
+.pdfhref W http://zfswatcher.damicon.fi/
+.\" eof
