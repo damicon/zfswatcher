@@ -1,8 +1,8 @@
 #! /bin/sh
 ### BEGIN INIT INFO
 # Provides:          zfswatcher
-# Required-Start:    zfs $syslog $network $remote_fs
-# Required-Stop:     zfs $syslog $network $remote_fs
+# Required-Start:    udev $syslog $network $remote_fs
+# Required-Stop:     udev $syslog $network $remote_fs
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: ZFS monitoring daemon
