@@ -24,6 +24,16 @@ Features
 - Disk "locate" LEDs can be controlled through web interface.
 
 
+Supported operating systems/distributions
+-----------------------------------------
+
+Linux on x86_64/amd64 platform. In particular the following distributions:
+
+- Debian 6.0 (squeeze)
+- Ubuntu 12.04 (precise)
+- Ubuntu 12.10 (quantal)
+- RHEL/CentOS/Scientific Linux 6.X
+
 Obtaining the software
 ----------------------
 
@@ -36,12 +46,20 @@ Source repository:
 https://github.com/damicon/zfswatcher/
 
 
-Installing on Debian/Ubuntu
----------------------------
+Installing and upgrading on Debian/Ubuntu
+-----------------------------------------
 
 Download the .deb package and install it with `dpkg`, for example:
 
     dpkg -i zfswatcher_0.01-1_amd64.deb
+
+
+Installing and upgrading on RHEL/CentOS/Scientific Linux
+--------------------------------------------------------
+
+Download the .rpm package and install it with `rpm`, for example:
+
+    rpm -U zfswatcher-0.01-1.x86_64.rpm
 
 
 Installing from source
@@ -106,6 +124,10 @@ Configuration
 Edit the configuration file:
 
     editor /etc/zfs/zfswatcher.conf
+
+After that restart the process, on Debian/Ubuntu as follows:
+
+    service zfswatcher restart
 
 If you change the default web templates, it is best to copy them
 from `/usr/local/share/zfswatcher/www` to another location and change
