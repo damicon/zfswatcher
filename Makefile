@@ -64,4 +64,25 @@ dist:
 deb:
 	dpkg-buildpackage -b -uc -tc
 
+# Make RPM package:
+rpm:	dist
+	rpmbuild=`mktemp -d "/tmp/zfswatcher-rpmbuild-XXXXXXXX"`;	\
+	mkdir -p $$rpmbuild/TMP &&					\
+	mkdir -p $$rpmbuild/BUILD &&					\
+	mkdir -p $$rpmbuild/RPMS &&					\
+	mkdir -p $$rpmbuild/SRPMS &&					\
+	mkdir -p $$rpmbuild/SPECS &&					\
+	cp zfswatcher.spec $$rpmbuild/SPECS/ &&				\
+	mkdir -p $$rpmbuild/SOURCES &&					\
+	cp zfswatcher-$(VERSION).tar.gz $$rpmbuild/SOURCES/ &&		\
+	rpmbuild -ba							\
+		--define "_topdir $$rpmbuild"				\
+		--define "_tmppath $$rpmbuild/TMP"			\
+		--define "version $(VERSION)"				\
+		zfswatcher.spec &&					\
+	cp $$rpmbuild/RPMS/*/* . &&					\
+	cp $$rpmbuild/SRPMS/* . &&					\
+	rm -r $$rpmbuild &&						\
+	echo "RPM build finished"
+
 # eof

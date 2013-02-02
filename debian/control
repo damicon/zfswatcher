@@ -11,8 +11,8 @@ Architecture: amd64
 Depends: zfs, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ledmon
 Description: ZFS pool monitoring and notification daemon
- Zfswatcher is a ZFS pool monitoring and notification daemon
- with the following features:
+ Zfswatcher is ZFS pool monitoring and notification daemon
+ with the following main features:
   * Periodically inspects the zpool status.
   * Sends configurable notifications on status changes.
   * Controls the disk enclosure LEDs.
