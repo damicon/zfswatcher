@@ -19,14 +19,15 @@
 # along with zfswatcher. If not, see <http://www.gnu.org/licenses/>.
 #
 
-SHELL = /bin/sh
-VERSION = 0.01
+# Change this before releasing new version:
+VERSION	= 0.01
 
-# Go tool:
-GO=go
+# Shell:
+SHELL	= /bin/sh
 
-# Go library path:
-GOPATH=`pwd`/golibs
+# Go tool and library path:
+GO	= go
+GOPATH	= `pwd`/golibs
 
 # Rules:
 all: zfswatcher
@@ -54,6 +55,12 @@ install: zfswatcher
 		$(DESTDIR)/usr/share/man/man8/zfswatcher.8
 	cp -R www $(DESTDIR)/usr/share/zfswatcher/www
 
+# Make tarball:
+dist:
+	git archive --prefix=zfswatcher-$(VERSION)/ \
+		-o zfswatcher-$(VERSION).tar.gz $(VERSION)
+
+# Make Debian package:
 deb:
 	dpkg-buildpackage -b -uc -tc
 
