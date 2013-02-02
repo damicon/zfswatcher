@@ -30,7 +30,7 @@ case "$1" in
 esac
 
 if [ "$1" = "purge" ] ; then
-	rm -rf /var/log/zfswatcher.log*
+	rm -r /var/log/zfswatcher.log*
 	rm -f /var/run/zfswatcher.pid
 fi
 
