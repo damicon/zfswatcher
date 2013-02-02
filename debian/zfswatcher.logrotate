@@ -1,7 +1,7 @@
 /var/lib/zfswatcher.log
 {
-	rotate 7
-	daily
+	rotate 6
+	monthly
 	missingok
 	notifempty
 	compress
