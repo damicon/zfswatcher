@@ -280,4 +280,30 @@ func parseStringMap(str string) (map[string]string, error) {
 	return smap, nil
 }
 
+// Write our pid to a file.
+func makePidFile(filename string) (err error) {
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(f, "%d\n", os.Getpid())
+	if err != nil {
+		f.Close()
+		os.Remove(filename)
+		return err
+	}
+	err = f.Close()
+	if err != nil {
+		os.Remove(filename)
+		return err
+	}
+	return nil
+}
+
+// Remove pid file.
+func removePidFile(filename string) (err error) {
+	err = os.Remove(filename)
+	return err
+}
+
 // eof

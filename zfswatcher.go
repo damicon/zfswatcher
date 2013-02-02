@@ -51,6 +51,7 @@ var cfg struct {
 		Zfslistrefresh     uint
 		Zfslistcmd         string
 		Zfslistusagecmd    string
+		Pidfile            string
 	}
 	Severity struct {
 		Poolstatemap             string
@@ -785,6 +786,12 @@ func main() {
 	signal.Notify(sigChup, syscall.SIGHUP) // reopen log files
 	sigCusr1 := make(chan os.Signal)
 	signal.Notify(sigCusr1, syscall.SIGUSR1) // debug output
+
+	// create a pid file if desired, remove it at the end of main()
+	if cfg.Main.Pidfile != "" {
+		makePidFile(cfg.Main.Pidfile)
+		defer removePidFile(cfg.Main.Pidfile)
+	}
 
 	notify.Print(notifier.INFO, "zfswatcher starting")
 
