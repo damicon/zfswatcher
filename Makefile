@@ -20,6 +20,7 @@
 #
 
 SHELL = /bin/sh
+VERSION = 0.01
 
 # Go tool:
 GO=go
@@ -30,12 +31,16 @@ GOPATH=`pwd`/golibs
 # Rules:
 all: zfswatcher
 
-zfswatcher: zfswatcher.go leds.go util.go webserver.go
+version.go:
+	(echo "package main" ; \
+	echo "const VERSION = \"$(VERSION)\"") > version.go
+
+zfswatcher: zfswatcher.go leds.go util.go webserver.go version.go
 	GOPATH=$(GOPATH) $(GO) build -o $@
 
 clean: 
 	GOPATH=$(GOPATH) $(GO) clean
-	rm -f zfswatcher
+	rm -f zfswatcher version.go
 
 install: zfswatcher
 	install -d $(DESTDIR)/usr/sbin $(DESTDIR)/etc/zfs \

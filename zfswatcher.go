@@ -36,10 +36,6 @@ import (
 	"zfswatcher.damicon.fi/notifier"
 )
 
-// Version number.
-
-const VERSION = "0.01"
-
 // Config file processing.
 
 const CFGFILE = "/etc/zfs/zfswatcher.conf"
