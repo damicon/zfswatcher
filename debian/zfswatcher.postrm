@@ -31,7 +31,7 @@ esac
 
 if [ "$1" = "purge" ] ; then
 	rm -rf /var/log/zfswatcher.log*
-	rm -rf /var/run/zfswatcher.pid
+	rm -f /var/run/zfswatcher.pid
 fi
 
 # dh_installdeb will replace this with shell code automatically
