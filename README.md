@@ -130,7 +130,7 @@ Some notes:
 - See the configuration file comments for information about the configuration
   settings.
 
-- Enclosure led management is disabled by default. Currently an external
+- Enclosure LED management is disabled by default. Currently an external
   utility `ledctl` (part of ledmon package) is required for this
   functionality.
 
