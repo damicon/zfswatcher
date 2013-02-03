@@ -157,7 +157,7 @@ https://github.com/damicon/zfswatcher/issues
 
 Reported bugs are fixed on best effort basis.
 
-Commercial support, custom licensing as well as complete
+Commercial support, custom features, custom licensing and complete
 storage solutions are available from Damicon Kraa Oy. Contact
 <zfswatcher-support@damicon.fi>.
 
