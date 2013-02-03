@@ -73,7 +73,8 @@ conventions. It can be started as follows:
 Installing from source
 ----------------------
 
-Generally it is best to use ready made packages on Debian/Ubuntu.
+Generally it is best to use the ready made packages on Debian/Ubuntu
+and RHEL/CentOS/Scientific Linux.
 
 If you are packaging this software yourself or you want to compile
 from source for other reasons, you can follow these instructions.
