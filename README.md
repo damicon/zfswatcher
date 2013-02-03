@@ -110,23 +110,6 @@ Then run:
     make install
 
 
-### Debian/Ubuntu packaging
-
-The distribution comes with Debian style packaging in `/debian/`
-subdirectory. A Debian package can be produced with the following
-command:
-
-    make deb
-
-Note that the Go programming language environment needs to be correctly
-installed even though it is not listed as a build dependency. This is
-because the newest version of the Go language is not available in the
-Debian/Ubuntu repositories.
-
-The resulting .deb package file, for example `zfswatcher_0.01-1_amd64.deb`
-is placed one directory level up from the source directory.
-
-
 Configuration
 -------------
 
