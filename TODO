@@ -1,9 +1,7 @@
 - udev trigger led update?
 - configurable device read/write/cksum error thresholds
 - alert about pool space nearly full (with configurable thresholds)
-- ubuntu upstart script
 - persist state
-- debian package
 - web interface: remove unused javascripts
 - web interface: iostats
 - web interface: user access levels?
@@ -15,5 +13,4 @@
 - function for sending test notification at desired level
 - documentation
   - general usage
-  - build & installation
 - lots of cleanup & refactoring :)
