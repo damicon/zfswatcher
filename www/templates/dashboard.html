@@ -6,6 +6,7 @@
 		<dt>system uptime:</dt><dd>{{ .SysUptime }}</dd>
 		<dt>zfswatcher uptime:</dt><dd>{{ .ZfswatcherUptime }}</dd>
 	</dl>
+	{{ if .Pools }}
 	<table class="table table-hover">
 		<thead>
 			<tr>
@@ -45,6 +46,11 @@
 			{{ end }}
 		</tbody>
 	</table>
+	{{ else }}
+	<div class="alert alert-info">
+		There are no pools.
+	</div>
+	{{ end }}
 {{ end }}
 
 {{ template "footer.html" .Nav }}
