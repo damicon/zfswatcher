@@ -8,7 +8,7 @@ Features
 
 - Periodically gets the zpool status output and parses it.
 
-- Sends notifications based on status changes.
+- Sends configurable notifications on status changes.
 
 - Supports the following notification destinations with configurable
   severity levels:
