@@ -1,0 +1,14 @@
+#
+# zfswatcher unit configuration file for systemd(8)
+#
+
+[Unit]
+Description=ZFS monitoring daemon
+Documentation=man:zfswatcher(8) http://zfswatcher.damicon.fi/
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/zfswatcher
+
+[Install]
+WantedBy=multi-user.target
