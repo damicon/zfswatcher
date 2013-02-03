@@ -41,7 +41,9 @@ zfswatcher: zfswatcher.go leds.go util.go webserver.go version.go
 
 clean: 
 	GOPATH=$(GOPATH) $(GO) clean
-	rm -f zfswatcher version.go
+	rm -f zfswatcher version.go \
+		zfswatcher-$(VERSION).tar.gz \
+		zfswatcher-$(VERSION)-*.rpm
 
 install: zfswatcher
 	install -d $(DESTDIR)/usr/sbin $(DESTDIR)/etc/zfs \
