@@ -141,8 +141,8 @@ Some notes:
 
 - The embedded web server is disabled by default.
 
-- If you change the default web templates, it is best to copy them from
-  `/usr/local/share/zfswatcher/www` to another location and change the
+- If you change the default web interface templates, it is best to copy them
+  from `/usr/local/share/zfswatcher/www` to another location and change the
   `templatedir` and `resourcedir` settings in the configuration accordingly.
   This way your local changes will not be overwritten if you upgrade the
   package at a later time.
