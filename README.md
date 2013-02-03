@@ -116,15 +116,35 @@ Edit the configuration file:
 
     editor /etc/zfs/zfswatcher.conf
 
-After that restart the process:
+Verify the configuration syntax:
+
+    zfswatcher -t
+
+Restart the process:
 
     service zfswatcher restart
 
-If you change the default web templates, it is best to copy them
-from `/usr/local/share/zfswatcher/www` to another location and change
-the `templatedir` and `resourcedir` settings in the configuration
-accordingly. This way your local changes will not be overwritten if you
-upgrade the zfswatcher package at a later time.
+Some notes:
+
+- See the configuration file comments for information about the configuration
+  settings.
+
+- Enclosure led management is disabled by default. Currently an external
+  utility `ledctl` (part of ledmon package) is required for this
+  functionality.
+
+- Logging to file `/var/log/zfswatcher.log` and local syslog daemon is enabled
+  by default.
+
+- E-mail notifications are disabled by default.
+
+- The embedded web server is disabled by default.
+
+- If you change the default web templates, it is best to copy them from
+  `/usr/local/share/zfswatcher/www` to another location and change the
+  `templatedir` and `resourcedir` settings in the configuration accordingly.
+  This way your local changes will not be overwritten if you upgrade the
+  package at a later time.
 
 
 Support
