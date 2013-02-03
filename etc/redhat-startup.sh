@@ -28,7 +28,7 @@ lockfile=/var/lock/subsys/$prog
 
 start() {
     echo -n $"Starting $prog: "
-    daemon $exec &
+    daemon "$exec &"
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile
