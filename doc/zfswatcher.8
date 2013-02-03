@@ -77,6 +77,8 @@ process does not "daemonize" itself (fork or double-fork to become a
 background process) like most traditional Unix daemons do. This is a
 modern approach and allows system process management daemons such as
 .BR upstart (8)
+and
+.BR systemd (8)
 to keep better control of the service. This can be worked around by
 using a tool such as 
 .BR start-stop-daemon (8).
