@@ -80,5 +80,5 @@ fi
 
 
 %changelog
-* Fri Feb  2 2013 Janne Snabb <snabb@epipe.com>
+* Fri Feb  2 2013 Janne Snabb <snabb@epipe.com> 0.1-1
 - Initial version of RPM package.
