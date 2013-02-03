@@ -53,6 +53,9 @@ Download the .deb package and install it with `dpkg`, for example:
 
     dpkg -i zfswatcher_0.01-1_amd64.deb
 
+The service is enabled by default according to the Debian and Ubuntu
+conventions.
+
 
 Installing and upgrading on RHEL/CentOS/Scientific Linux
 --------------------------------------------------------
@@ -60,6 +63,12 @@ Installing and upgrading on RHEL/CentOS/Scientific Linux
 Download the .rpm package and install it with `rpm`, for example:
 
     rpm -U zfswatcher-0.01-1.x86_64.rpm
+
+The service is **not** enabled by default according to Red Hat
+conventions. It can be enabled as follows:
+
+    chkconfig zfswatcher on
+    service zfswatcher start
 
 
 Installing from source
@@ -125,7 +134,7 @@ Edit the configuration file:
 
     editor /etc/zfs/zfswatcher.conf
 
-After that restart the process, on Debian/Ubuntu as follows:
+After that restart the process:
 
     service zfswatcher restart
 
