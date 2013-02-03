@@ -325,7 +325,8 @@ func parseZpoolStatus(zpoolStatusOutput string) (pools []*PoolType, err error) {
 		// this state machine implements a parser:
 		switch {
 		case s == stSTART && line == "no pools available":
-			s = stSTART
+			// pools will be empty slice
+			return pools, nil
 		case s == stSTART && len(line) >= 8 && line[:8] == "  pool: ":
 			curpool = &PoolType{name: line[8:]}
 			s = stPOOL
