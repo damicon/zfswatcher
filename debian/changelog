@@ -1,3 +1,9 @@
+zfswatcher (0.02-1) unstable; urgency=low
+
+  * Update to version 0.02.
+
+ -- Janne Snabb <snabb@epipe.com>  Mon, 04 Feb 2013 15:39:11 +0200
+
 zfswatcher (0.01-1) unstable; urgency=low
 
   * Initial release.
