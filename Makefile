@@ -29,6 +29,20 @@ SHELL	= /bin/sh
 GO	= /usr/local/go/bin/go
 GOPATH	= `pwd`/golibs
 
+# Installation directories:
+prefix		= /usr
+exec_prefix	= $(prefix)
+bindir		= $(exec_prefix)/bin
+sbindir		= $(exec_prefix)/sbin
+datarootdir	= $(prefix)/share
+datadir		= $(datarootdir)
+sysconfdir	= /etc
+docdir		= $(datarootdir)/doc/zfswatcher
+mandir		= $(datarootdir)/man
+man1dir		= $(mandir)/man1
+man5dir		= $(mandir)/man5
+man8dir		= $(mandir)/man8
+
 # Rules:
 all: zfswatcher
 
@@ -48,16 +62,16 @@ clean:
 		zfswatcher_$(VERSION)-*.changes
 
 install: zfswatcher
-	install -d $(DESTDIR)/usr/sbin $(DESTDIR)/etc/zfs \
-		$(DESTDIR)/usr/share/zfswatcher \
-		$(DESTDIR)/usr/share/man/man8
-	install -c zfswatcher $(DESTDIR)/usr/sbin/zfswatcher
-	test -e $(DESTDIR)/etc/zfs/zfswatcher.conf \
+	install -d $(DESTDIR)$(sbindir) $(DESTDIR)$(sysconfdir)/zfs \
+		$(DESTDIR)$(datadir)/zfswatcher \
+		$(DESTDIR)$(man8dir)
+	install -c zfswatcher $(DESTDIR)$(sbindir)/zfswatcher
+	test -e $(DESTDIR)$(sysconfdir)/zfs/zfswatcher.conf \
 		|| install -c -m 644 etc/zfswatcher.conf \
-			$(DESTDIR)/etc/zfs/zfswatcher.conf
+			$(DESTDIR)$(sysconfdir)/zfs/zfswatcher.conf
 	install -c -m 644 doc/zfswatcher.8 \
-		$(DESTDIR)/usr/share/man/man8/zfswatcher.8
-	cp -R www $(DESTDIR)/usr/share/zfswatcher/www
+		$(DESTDIR)$(man8dir)/zfswatcher.8
+	cp -R www $(DESTDIR)$(datadir)/zfswatcher/www
 
 # Make tarball:
 dist:
@@ -66,9 +80,9 @@ dist:
 
 # Make Debian package:
 deb:
-	dpkg-buildpackage -b -uc -tc
-	mv ../zfswatcher_$(VERSION)-*.deb \
-		../zfswatcher_$(VERSION)-*.changes \
+	dpkg-buildpackage -b -uc -tc &&					\
+	mv ../zfswatcher_$(VERSION)-*.deb 				\
+		../zfswatcher_$(VERSION)-*.changes 			\
 		.
 
 # Make RPM package:
