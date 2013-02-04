@@ -1,0 +1,16 @@
+          zfswatcher - ZFS pool monitoring and notification daemon
+
+                           version history
+
+version 0.2 released 2013-02-04
+
+ - Compatibility fix for changes in ZoL 0.6.0-rc14 output formatting.
+
+ - Other minor improvements.
+
+
+version 0.01 released 2013-02-03
+
+ - Initial release.
+
+/* eof */
