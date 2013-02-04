@@ -26,7 +26,7 @@ VERSION	= 0.01
 SHELL	= /bin/sh
 
 # Go tool and library path:
-GO	= go
+GO	= /usr/local/go/bin/go
 GOPATH	= `pwd`/golibs
 
 # Rules:
