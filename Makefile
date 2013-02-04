@@ -78,6 +78,13 @@ dist:
 	git archive --prefix=zfswatcher-$(VERSION)/ \
 		-o zfswatcher-$(VERSION).tar.gz $(VERSION)
 
+# Make a new Debian package version:
+newdebversion:
+	dch --newversion $(VERSION)-1					\
+		--upstream						\
+		--distribution unstable 				\
+		"New version $(VERSION)"
+
 # Make Debian package:
 deb:
 	dpkg-buildpackage -b -uc -tc &&					\
