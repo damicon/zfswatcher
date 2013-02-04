@@ -52,7 +52,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc README.md COPYING
+%doc README.md COPYING NEWS
 %{_sbindir}/*
 %{_mandir}/man8/*
 %{_datadir}/%{name}/
