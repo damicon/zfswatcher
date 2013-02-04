@@ -291,7 +291,6 @@ const (
 	stSTATE
 	stSTATUS
 	stACTION
-	stCOMMENT
 	stSEE
 	stSCAN
 	stCONFIG
@@ -344,20 +343,17 @@ func parseZpoolStatus(zpoolStatusOutput string) (pools []*PoolType, err error) {
 			s = stACTION
 		case s == stACTION && len(line) >= 1 && line[:1] == "\t":
 			curpool.action += "\n" + line[1:]
-		case (s == stSTATE || s == stACTION) && len(line) >= 8 && line[:8] == "comment: ":
-			// the comment is ignored for now
-			s = stCOMMENT
-		case (s == stSTATE || s == stACTION || s == stCOMMENT) && len(line) >= 8 &&
+		case (s == stSTATE || s == stACTION) && len(line) >= 8 &&
 			line[:8] == "   see: ":
 			curpool.see = line[8:]
 			s = stSEE
-		case (s == stSTATE || s == stACTION || s == stCOMMENT || s == stSEE) &&
+		case (s == stSTATE || s == stACTION || s == stSEE) &&
 			len(line) >= 7 && line[:7] == " scan: ":
 			curpool.scan = line[7:]
 			s = stSCAN
 		// fix for 240245896aad46d0d41b0f9f257ff2abd09cb29b
 		// released in zfs-0.6.0-rc14
-		case (s == stSTATE || s == stACTION || s == stCOMMENT || s == stSEE) &&
+		case (s == stSTATE || s == stACTION || s == stSEE) &&
 			len(line) >= 8 && line[:8] == "  scan: ":
 			curpool.scan = line[8:]
 			s = stSCAN
@@ -365,7 +361,7 @@ func parseZpoolStatus(zpoolStatusOutput string) (pools []*PoolType, err error) {
 			curpool.scan += "\n" + line[1:]
 		case s == stSCAN && len(line) >= 4 && line[:4] == "    ":
 			curpool.scan += "\n" + line[4:]
-		case (s == stSCAN || s == stSTATE || s == stACTION || s == stCOMMENT || s == stSEE) &&
+		case (s == stSCAN || s == stSTATE || s == stACTION || s == stSEE) &&
 			len(line) >= 7 && line[:7] == "config:":
 			s = stCONFIG
 			if line[7:] != "" {
