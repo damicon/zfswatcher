@@ -43,7 +43,9 @@ clean:
 	GOPATH=$(GOPATH) $(GO) clean
 	rm -f zfswatcher version.go \
 		zfswatcher-$(VERSION).tar.gz \
-		zfswatcher-$(VERSION)-*.rpm
+		zfswatcher-$(VERSION)-*.rpm \
+		zfswatcher_$(VERSION)-*.deb \
+		zfswatcher_$(VERSION)-*.changes
 
 install: zfswatcher
 	install -d $(DESTDIR)/usr/sbin $(DESTDIR)/etc/zfs \
@@ -65,6 +67,9 @@ dist:
 # Make Debian package:
 deb:
 	dpkg-buildpackage -b -uc -tc
+	mv ../zfswatcher_$(VERSION)-*.deb \
+		../zfswatcher_$(VERSION)-*.changes \
+		.
 
 # Make RPM package:
 rpm:	dist
