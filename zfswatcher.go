@@ -438,29 +438,8 @@ func checkZpoolStatus(os, ns []*PoolType) {
 			trackNotifications(notificationSev, name, sevCfg.poolAdded)
 			continue
 		}
-		// pre-existing pool, perform checks to find changes:
-		if ns_pools[name].state != os_pools[name].state {
-			severity := sevCfg.poolStateMap.getSeverity(ns_pools[name].state)
-			notify.Printf(severity, `pool "%s" state changed: %s -> %s`,
-				name, os_pools[name].state, ns_pools[name].state)
-			trackNotifications(notificationSev, name, severity)
-		}
-		if ns_pools[name].status != os_pools[name].status {
-			if ns_pools[name].status != "" {
-				notify.Printf(sevCfg.poolStatusChanged, `pool "%s" new status: %s`,
-					name, ns_pools[name].status)
-				trackNotifications(notificationSev, name, sevCfg.poolStatusChanged)
-			} else {
-				notify.Printf(sevCfg.poolStatusCleared, `pool "%s" status cleared`,
-					name)
-				trackNotifications(notificationSev, name, sevCfg.poolStatusCleared)
-			}
-		}
-		if ns_pools[name].errors != os_pools[name].errors {
-			notify.Printf(sevCfg.poolErrorsChanged, `pool "%s" new errors: %s`,
-				name, ns_pools[name].errors)
-			trackNotifications(notificationSev, name, sevCfg.poolErrorsChanged)
-		}
+		// pre-existing pool
+
 		// make maps of devices in the pool:
 		os_devs := map[string]*DevEntry{}
 		for _, dev := range os_pools[name].devs {
@@ -538,6 +517,29 @@ func checkZpoolStatus(os, ns []*PoolType) {
 						sevCfg.devAdditionalInfoCleared)
 				}
 			}
+		}
+		// check changes in the general pool information:
+		if ns_pools[name].status != os_pools[name].status {
+			if ns_pools[name].status != "" {
+				notify.Printf(sevCfg.poolStatusChanged, `pool "%s" new status: %s`,
+					name, ns_pools[name].status)
+				trackNotifications(notificationSev, name, sevCfg.poolStatusChanged)
+			} else {
+				notify.Printf(sevCfg.poolStatusCleared, `pool "%s" status cleared`,
+					name)
+				trackNotifications(notificationSev, name, sevCfg.poolStatusCleared)
+			}
+		}
+		if ns_pools[name].errors != os_pools[name].errors {
+			notify.Printf(sevCfg.poolErrorsChanged, `pool "%s" new errors: %s`,
+				name, ns_pools[name].errors)
+			trackNotifications(notificationSev, name, sevCfg.poolErrorsChanged)
+		}
+		if ns_pools[name].state != os_pools[name].state {
+			severity := sevCfg.poolStateMap.getSeverity(ns_pools[name].state)
+			notify.Printf(severity, `pool "%s" state changed: %s -> %s`,
+				name, os_pools[name].state, ns_pools[name].state)
+			trackNotifications(notificationSev, name, severity)
 		}
 	}
 	// attach complete pool status for pools which had notifications
