@@ -21,18 +21,39 @@
 
 package main
 
+// #include <stdlib.h>
+import "C"
+
 import (
+	"errors"
+	"syscall"
 	"time"
+	"unsafe"
 )
 
 // Returns system uptime as time.Duration.
 func getSystemUptime() (uptime time.Duration, err error) {
-	return 0, nil
+	val, err := syscall.Sysctl("kern.boottime")
+	if err != nil {
+		return 0, err
+	}
+	buf := []byte(val)
+	tv := (*syscall.Timeval)(unsafe.Pointer(&buf[0]))
+
+	return time.Since(time.Unix(tv.Unix())), nil
 }
 
 // Returns system load averages.
-func getSystemLoadaverage() (la [3]float32, err error) {
-	return la, nil
+func getSystemLoadaverage() ([3]float32, error) {
+	avg := []C.double{0, 0, 0}
+
+	n := C.getloadavg(&avg[0], C.int(len(avg)))
+
+	if n == -1 {
+		return [3]float32{0, 0, 0}, errors.New("load average unavailable")
+	}
+        return [3]float32{float32(avg[0]), float32(avg[1]), float32(avg[2])}, nil
+
 }
 
 // Device lookup paths. (This list comes from lib/libzfs/libzfs_import.c)
