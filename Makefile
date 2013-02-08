@@ -50,7 +50,7 @@ version.go:
 	(echo "package main" ; \
 	echo "const VERSION = \"$(VERSION)\"") > version.go
 
-zfswatcher: zfswatcher.go leds.go util.go webserver.go version.go
+zfswatcher: zfswatcher.go leds.go util.go webserver.go version.go osutil_linux.go osutil_freebsd.go
 	GOPATH=$(GOPATH) $(GO) build -o $@
 
 clean: 
