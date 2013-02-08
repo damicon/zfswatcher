@@ -20,7 +20,7 @@
 #
 
 # Change this before releasing new version:
-VERSION	= 0.02
+VERSION	= 0.03
 
 # Shell:
 SHELL	= /bin/sh
