@@ -21,6 +21,10 @@
 
 package main
 
+import (
+	"time"
+)
+
 // Returns system uptime as time.Duration.
 func getSystemUptime() (uptime time.Duration, err error) {
 	return 0, nil
