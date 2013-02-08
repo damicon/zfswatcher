@@ -24,7 +24,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -112,46 +111,6 @@ func getGoEnvironment() string {
 		runtime.GOOS, runtime.GOARCH)
 }
 
-// Returns system uptime as time.Duration.
-func getSystemUptime() (uptime time.Duration, err error) {
-	// XXX works only on linux for now
-
-	buf, err := ioutil.ReadFile("/proc/uptime")
-	if err != nil {
-		return uptime, err
-	}
-	var up, idle float64
-	n, err := fmt.Sscanln(string(buf), &up, &idle)
-	if err != nil {
-		return uptime, err
-	}
-	if n != 2 {
-		return uptime, errors.New("failed parsing /proc/uptime")
-	}
-	uptime = time.Duration(up) * time.Second
-
-	return uptime, nil
-}
-
-// Returns system load averages.
-func getSystemLoadaverage() (la [3]float32, err error) {
-	// XXX works only on linux for now
-
-	buf, err := ioutil.ReadFile("/proc/loadavg")
-	if err != nil {
-		return la, err
-	}
-	n, err := fmt.Sscan(string(buf), &la[0], &la[1], &la[2])
-	if err != nil {
-		return la, err
-	}
-	if n != 3 {
-		return la, errors.New("failed parsing /proc/loadavg")
-	}
-
-	return la, nil
-}
-
 // Utility function for myDurationString.
 func fmtInt(buf []byte, v uint64) int {
 	w := len(buf)
@@ -219,18 +178,6 @@ func myDurationString(d time.Duration) string {
 	}
 
 	return string(buf[w:])
-}
-
-// Device lookup paths. (This list comes from lib/libzfs/libzfs_import.c)
-var deviceLookupPaths = [...]string{
-	"/dev/disk/by-vdev",
-	"/dev/disk/zpool",
-	"/dev/mapper",
-	"/dev/disk/by-uuid",
-	"/dev/disk/by-id",
-	"/dev/disk/by-path",
-	"/dev/disk/by-label",
-	"/dev",
 }
 
 // Find full device path.
