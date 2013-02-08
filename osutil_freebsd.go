@@ -38,7 +38,7 @@ func getSystemUptime() (uptime time.Duration, err error) {
 		return 0, err
 	}
 	buf := []byte(val)
-	tv := (*syscall.Timeval)(unsafe.Pointer(&buf[0]))
+	tv := *syscall.Timeval(unsafe.Pointer(&buf[0]))
 
 	return time.Since(time.Unix(tv.Unix())), nil
 }
