@@ -24,6 +24,8 @@ compile_go_package () {
 	subpackages="$subpackages $INC/$module.o"
 }
 
+make version.go
+
 compile_go_package code.google.com/p/gcfg/token \
 	token.go position.go serialize.go
 compile_go_package code.google.com/p/gcfg/scanner \
