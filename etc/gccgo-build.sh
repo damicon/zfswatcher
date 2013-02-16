@@ -2,11 +2,11 @@
 
 set -e
 
-GCCGO=	gccgo
-GOOS=	solaris
-GOARCH=	amd64
+GCCGO=gccgo
+GOOS=solaris
+GOARCH=amd64
 
-INC=	golibs/src
+INC=golibs/src
 
 subpackages=""
 
