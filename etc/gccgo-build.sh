@@ -2,8 +2,11 @@
 
 set -e
 
-GCCGO=gccgo
-INC=golibs/src
+GCCGO=	gccgo
+GOOS=	solaris
+GOARCH=	amd64
+
+INC=	golibs/src
 
 subpackages=""
 
@@ -44,7 +47,7 @@ compile_go_package zfswatcher.damicon.fi/notifier \
 set -x
 $GCCGO -I $INC -o zfswatcher \
 	zfswatcher.go leds.go util.go version.go webserver.go \
-	osutil_solaris.go \
+	osutil_$GOOS.go \
 	$subpackages
 
 # eof
