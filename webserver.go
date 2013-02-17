@@ -22,7 +22,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	auth "github.com/abbot/go-http-auth"
 	"html/template"
@@ -36,11 +35,25 @@ import (
 
 var templates *template.Template
 
-var (
-	wwwSevClass       map[notifier.Severity]string
-	wwwPoolStateClass map[string]string
-	wwwDevStateClass  map[string]string
-)
+type severityToWwwClassMap map[notifier.Severity]string
+
+// Implement fmt.Scanner interface.
+func (scmapp *severityToWwwClassMap) Scan(state fmt.ScanState, verb rune) error {
+	smap, err := ScanMapHelper(state, verb)
+	if err != nil {
+		return err
+	}
+	scmap := make(severityToWwwClassMap)
+	for a, b := range smap {
+		var severity notifier.Severity
+		if n, err := fmt.Sscan(a, &severity); n != 1 {
+			return err
+		}
+		scmap[severity] = b
+	}
+	*scmapp = scmap
+	return nil
+}
 
 type webNav struct {
 	// active main menu entry
@@ -122,7 +135,7 @@ func wwwLogReceiver(m *notifier.Msg) {
 	case notifier.MSGTYPE_MESSAGE:
 		nm := &logMsgWeb{}
 		nm.Time, nm.Severity, nm.Text = m.MsgToStrings()
-		nm.Class = wwwSevClass[m.Severity]
+		nm.Class = cfg.Www.Severitycssclassmap[m.Severity]
 		wwwLogBuffer = append(wwwLogBuffer, nm)
 	case notifier.MSGTYPE_ATTACHMENT:
 		prev := len(wwwLogBuffer) - 1
@@ -133,7 +146,7 @@ func wwwLogReceiver(m *notifier.Msg) {
 			// make a new entry only with the attachment
 			nm := &logMsgWeb{}
 			nm.Time, nm.Severity, nm.Attachment = m.MsgToStrings()
-			nm.Class = wwwSevClass[m.Severity]
+			nm.Class = cfg.Www.Severitycssclassmap[m.Severity]
 			wwwLogBuffer = append(wwwLogBuffer, nm)
 		}
 	}
@@ -143,28 +156,11 @@ func wwwLogReceiver(m *notifier.Msg) {
 	wwwLogMutex.Unlock()
 }
 
-func parseWwwSeverityToClassMap(str string) (map[notifier.Severity]string, error) {
-	scmap := make(map[notifier.Severity]string)
-
-	for _, entry := range strings.Fields(str) {
-		pair := strings.SplitN(entry, ":", 2)
-		if len(pair) < 2 {
-			return nil, errors.New(`invalid map entry "` + entry + `"`)
-		}
-		sev, err := notifier.GetSeverityCode(pair[0])
-		if err != nil {
-			return nil, err
-		}
-		scmap[sev] = pair[1]
-	}
-	return scmap, nil
-}
-
 func makePoolStatusWeb(pool *PoolType, usage map[string]*PoolUsageType) *poolStatusWeb {
 	statusWeb := &poolStatusWeb{
 		Name:       pool.name,
 		State:      pool.state,
-		StateClass: wwwPoolStateClass[pool.state],
+		StateClass: cfg.Www.Poolstatecssclassmap[pool.state],
 		Status:     pool.status,
 		Action:     pool.action,
 		See:        pool.see,
@@ -185,7 +181,7 @@ func makePoolStatusWeb(pool *PoolType, usage map[string]*PoolUsageType) *poolSta
 		devw := devStatusWeb{
 			Name:       dev.name,
 			State:      dev.state,
-			StateClass: wwwDevStateClass[dev.state],
+			StateClass: cfg.Www.Devstatecssclassmap[dev.state],
 			Read:       dev.read,
 			Write:      dev.write,
 			Cksum:      dev.cksum,

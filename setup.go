@@ -39,6 +39,7 @@ const CFGFILE = "/etc/zfs/zfswatcher.conf"
 var cfgFile string
 
 type stateToSeverityMap map[string]notifier.Severity
+type stringToStringMap map[string]string
 
 type cfgType struct {
 	Main struct {
@@ -49,42 +50,26 @@ type cfgType struct {
 		Zfslistusagecmd    string
 		Pidfile            string
 	}
-	Severity struct { // unparsed
-		Poolstatemap             string
-		Pooladded                string
-		Poolremoved              string
-		Poolstatuschanged        string
-		Poolstatuscleared        string
-		Poolerrorschanged        string
-		Devstatemap              string
-		Devadded                 string
-		Devremoved               string
-		Devreaderrorsincreased   string
-		Devwriteerrorsincreased  string
-		Devcksumerrorsincreased  string
-		Devadditionalinfochanged string
-		Devadditionalinfocleared string
-	}
-	sev struct { // same as previous but parsed format
-		poolStateMap             stateToSeverityMap
-		poolAdded                notifier.Severity
-		poolRemoved              notifier.Severity
-		poolStatusChanged        notifier.Severity
-		poolStatusCleared        notifier.Severity
-		poolErrorsChanged        notifier.Severity
-		devStateMap              stateToSeverityMap
-		devAdded                 notifier.Severity
-		devRemoved               notifier.Severity
-		devReadErrorsIncreased   notifier.Severity
-		devWriteErrorsIncreased  notifier.Severity
-		devCksumErrorsIncreased  notifier.Severity
-		devAdditionalInfoChanged notifier.Severity
-		devAdditionalInfoCleared notifier.Severity
+	Severity struct {
+		Poolstatemap             stateToSeverityMap
+		Pooladded                notifier.Severity
+		Poolremoved              notifier.Severity
+		Poolstatuschanged        notifier.Severity
+		Poolstatuscleared        notifier.Severity
+		Poolerrorschanged        notifier.Severity
+		Devstatemap              stateToSeverityMap
+		Devadded                 notifier.Severity
+		Devremoved               notifier.Severity
+		Devreaderrorsincreased   notifier.Severity
+		Devwriteerrorsincreased  notifier.Severity
+		Devcksumerrorsincreased  notifier.Severity
+		Devadditionalinfochanged notifier.Severity
+		Devadditionalinfocleared notifier.Severity
 	}
 	Leds struct {
 		Enable      bool
 		Ledctlcmd   string
-		Devstatemap string
+		Devstatemap devStateToIbpiMap
 	}
 	Logfile map[string]*struct {
 		Enable bool
@@ -115,9 +100,9 @@ type cfgType struct {
 		Bind                 string
 		Templatedir          string
 		Resourcedir          string
-		Severitycssclassmap  string
-		Poolstatecssclassmap string
-		Devstatecssclassmap  string
+		Severitycssclassmap  severityToWwwClassMap
+		Poolstatecssclassmap stringToStringMap
+		Devstatecssclassmap  stringToStringMap
 	}
 	Wwwuser map[string]*struct {
 		Enable   bool
@@ -127,42 +112,59 @@ type cfgType struct {
 
 var cfg *cfgType
 
+func ScanMapHelper(state fmt.ScanState, verb rune) (map[string]string, error) {
+	smap := make(map[string]string)
+	for {
+		tok, err := state.Token(true, nil)
+		if err != nil {
+			return nil, err
+		}
+		if len(tok) == 0 { // end of string
+			break
+		}
+		str := string(tok)
+		pair := strings.SplitN(str, ":", 2)
+		if len(pair) != 2 {
+			return nil, errors.New(`invalid map entry "` + str + `"`)
+		}
+		smap[pair[0]] = pair[1]
+	}
+	return smap, nil
+}
+
+// Implement fmt.Scanner interface.
+func (ssmapp *stringToStringMap) Scan(state fmt.ScanState, verb rune) error {
+	smap, err := ScanMapHelper(state, verb)
+	if err != nil {
+		return err
+	}
+	*ssmapp = smap
+	return nil
+}
+
+// Implement fmt.Scanner interface.
+func (ssmapp *stateToSeverityMap) Scan(state fmt.ScanState, verb rune) error {
+	smap, err := ScanMapHelper(state, verb)
+	if err != nil {
+		return err
+	}
+	ssmap := make(stateToSeverityMap)
+	for a, b := range smap {
+		var severity notifier.Severity
+		if n, err := fmt.Sscan(b, &severity); n != 1 {
+			return err
+		}
+		ssmap[a] = severity
+	}
+	*ssmapp = ssmap
+	return nil
+}
+
 // Finds an entry in stateToSeverityMap, returns INFO as default.
 func (ssmap stateToSeverityMap) getSeverity(str string) notifier.Severity {
 	sev, ok := ssmap[str]
 	if !ok {
 		sev = notifier.INFO
-	}
-	return sev
-}
-
-// Parses a string which describes how to map "state" strings to severity levels.
-func parseStateToSeverityMap(str string) (stateToSeverityMap, error) {
-	ssmap := make(stateToSeverityMap)
-
-	for _, entry := range strings.Fields(str) {
-		pair := strings.SplitN(entry, ":", 2)
-		if len(pair) < 2 {
-			return nil, errors.New(`invalid map entry "` + entry + `"`)
-		}
-		sev, err := notifier.GetSeverityCode(pair[1])
-		if err != nil {
-			return nil, err
-		}
-		ssmap[pair[0]] = sev
-	}
-	return ssmap, nil
-}
-
-// Convert severity string to notifier.SEVERITY (or use default unless defined). Complain
-// about errors.
-func getSevCfg(sevStr string, cfgFile string, errLabel string, defaultSev notifier.Severity, errorSeen *bool) (sev notifier.Severity) {
-	if sevStr != "" {
-		var err error
-		sev, err = notifier.GetSeverityCode(sevStr)
-		checkCfgErr(cfgFile, "severity", "", errLabel, err, errorSeen)
-	} else {
-		sev = defaultSev
 	}
 	return sev
 }
@@ -198,50 +200,24 @@ func getCfg() *cfgType {
 	c.Main.Zfslistcmd = "zfs list -H -o name,avail,used,usedsnap,usedds,usedrefreserv,usedchild,refer,mountpoint -d 0"
 	c.Main.Zfslistusagecmd = "zfs list -H -o name,avail,used,usedsnap,usedds,usedrefreserv,usedchild,refer,mountpoint -r -t all"
 	c.Leds.Ledctlcmd = "ledctl"
+	c.Severity.Pooladded = notifier.INFO
+	c.Severity.Poolremoved = notifier.INFO
+	c.Severity.Poolstatuschanged = notifier.INFO
+	c.Severity.Poolstatuscleared = notifier.INFO
+	c.Severity.Poolerrorschanged = notifier.INFO
+	c.Severity.Devadded = notifier.INFO
+	c.Severity.Devremoved = notifier.INFO
+	c.Severity.Devreaderrorsincreased = notifier.INFO
+	c.Severity.Devwriteerrorsincreased = notifier.INFO
+	c.Severity.Devcksumerrorsincreased = notifier.INFO
+	c.Severity.Devadditionalinfochanged = notifier.INFO
+	c.Severity.Devadditionalinfocleared = notifier.INFO
 
 	// read configuration settings:
 	err := gcfg.ReadFileInto(&c, cfgFile)
 	checkCfgErr(cfgFile, "", "", "", err, &errorSeen)
 
-	if c.Severity.Poolstatemap != "" {
-		c.sev.poolStateMap, err = parseStateToSeverityMap(c.Severity.Poolstatemap)
-		checkCfgErr(cfgFile, "severity", "", "poolstatemap", err, &errorSeen)
-	}
-	c.sev.poolAdded = getSevCfg(c.Severity.Pooladded,
-		cfgFile, "pooladded", notifier.INFO, &errorSeen)
-	c.sev.poolRemoved = getSevCfg(c.Severity.Poolremoved,
-		cfgFile, "poolremoved", notifier.INFO, &errorSeen)
-	c.sev.poolStatusChanged = getSevCfg(c.Severity.Poolstatuschanged,
-		cfgFile, "poolstatuschanged", notifier.INFO, &errorSeen)
-	c.sev.poolStatusCleared = getSevCfg(c.Severity.Poolstatuscleared,
-		cfgFile, "poolstatuscleared", notifier.INFO, &errorSeen)
-	c.sev.poolErrorsChanged = getSevCfg(c.Severity.Poolerrorschanged,
-		cfgFile, "poolerrorschanged", notifier.INFO, &errorSeen)
-
-	if c.Severity.Devstatemap != "" {
-		c.sev.devStateMap, err = parseStateToSeverityMap(c.Severity.Devstatemap)
-		checkCfgErr(cfgFile, "severity", "", "devstatemap", err, &errorSeen)
-	}
-	c.sev.devAdded = getSevCfg(c.Severity.Devadded,
-		cfgFile, "devadded", notifier.INFO, &errorSeen)
-	c.sev.devRemoved = getSevCfg(c.Severity.Devremoved,
-		cfgFile, "devremoved", notifier.INFO, &errorSeen)
-	c.sev.devReadErrorsIncreased = getSevCfg(c.Severity.Devreaderrorsincreased,
-		cfgFile, "devreaderrorsincreased", notifier.INFO, &errorSeen)
-	c.sev.devWriteErrorsIncreased = getSevCfg(c.Severity.Devwriteerrorsincreased,
-		cfgFile, "devwriteerrorsincreased", notifier.INFO, &errorSeen)
-	c.sev.devCksumErrorsIncreased = getSevCfg(c.Severity.Devcksumerrorsincreased,
-		cfgFile, "devcksumerrorsincreased", notifier.INFO, &errorSeen)
-	c.sev.devAdditionalInfoChanged = getSevCfg(c.Severity.Devadditionalinfochanged,
-		cfgFile, "devadditionalinfochanged", notifier.INFO, &errorSeen)
-	c.sev.devAdditionalInfoCleared = getSevCfg(c.Severity.Devadditionalinfocleared,
-		cfgFile, "devadditionalinfocleared", notifier.INFO, &errorSeen)
-
-	if c.Leds.Devstatemap != "" {
-		devStateToIbpiMap, err = parseDevStateToIbpiMap(c.Leds.Devstatemap)
-		checkCfgErr(cfgFile, "leds", "", "devstatemap", err, &errorSeen)
-	}
-
+	// setup logging
 	for prof, s := range c.Logfile {
 		if s.Enable {
 			sev, err := notifier.GetSeverityCode(s.Level)
@@ -276,15 +252,6 @@ func getCfg() *cfgType {
 		err = notify.AddLoggerCallback(sev, wwwLogReceiver)
 		checkCfgErr(cfgFile, "www", "", "", err, &errorSeen)
 	}
-	if c.Www.Enable {
-		wwwSevClass, err = parseWwwSeverityToClassMap(c.Www.Severitycssclassmap)
-		checkCfgErr(cfgFile, "www", "", "severitycssclassmap", err, &errorSeen)
-		wwwPoolStateClass, err = parseStringMap(c.Www.Poolstatecssclassmap)
-		checkCfgErr(cfgFile, "www", "", "poolstatecssclassmap", err, &errorSeen)
-		wwwDevStateClass, err = parseStringMap(c.Www.Devstatecssclassmap)
-		checkCfgErr(cfgFile, "www", "", "devstatecssclassmap", err, &errorSeen)
-	}
-
 	if errorSeen {
 		return nil
 	}

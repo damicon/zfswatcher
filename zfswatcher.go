@@ -22,10 +22,8 @@
 package main
 
 import (
-	"code.google.com/p/gcfg"
 	"errors"
 	"fmt"
-	"github.com/ogier/pflag"
 	"os"
 	"os/signal"
 	"runtime"
@@ -35,79 +33,6 @@ import (
 	"time"
 	"zfswatcher.damicon.fi/notifier"
 )
-
-// Config file processing.
-
-const CFGFILE = "/etc/zfs/zfswatcher.conf"
-
-var cfg struct {
-	Main struct {
-		Zpoolstatusrefresh uint
-		Zpoolstatuscmd     string
-		Zfslistrefresh     uint
-		Zfslistcmd         string
-		Zfslistusagecmd    string
-		Pidfile            string
-	}
-	Severity struct {
-		Poolstatemap             string
-		Pooladded                string
-		Poolremoved              string
-		Poolstatuschanged        string
-		Poolstatuscleared        string
-		Poolerrorschanged        string
-		Devstatemap              string
-		Devadded                 string
-		Devremoved               string
-		Devreaderrorsincreased   string
-		Devwriteerrorsincreased  string
-		Devcksumerrorsincreased  string
-		Devadditionalinfochanged string
-		Devadditionalinfocleared string
-	}
-	Leds struct {
-		Enable      bool
-		Ledctlcmd   string
-		Devstatemap string
-	}
-	Logfile map[string]*struct {
-		Enable bool
-		Level  string
-		File   string
-	}
-	Syslog map[string]*struct {
-		Enable   bool
-		Level    string
-		Server   string
-		Facility string
-	}
-	Email map[string]*struct {
-		Enable   bool
-		Level    string
-		Server   string
-		Username string
-		Password string
-		From     string
-		To       string
-		Subject  string
-		Throttle int64
-	}
-	Www struct {
-		Enable               bool
-		Level                string
-		Logbuffer            int
-		Bind                 string
-		Templatedir          string
-		Resourcedir          string
-		Severitycssclassmap  string
-		Poolstatecssclassmap string
-		Devstatecssclassmap  string
-	}
-	Wwwuser map[string]*struct {
-		Enable   bool
-		Password string
-	}
-}
 
 // Other global variables.
 
@@ -121,25 +46,6 @@ var currentState struct {
 }
 
 var startTime time.Time
-
-type stateToSeverityMap map[string]notifier.Severity
-
-var sevCfg struct {
-	poolStateMap             stateToSeverityMap
-	poolAdded                notifier.Severity
-	poolRemoved              notifier.Severity
-	poolStatusChanged        notifier.Severity
-	poolStatusCleared        notifier.Severity
-	poolErrorsChanged        notifier.Severity
-	devStateMap              stateToSeverityMap
-	devAdded                 notifier.Severity
-	devRemoved               notifier.Severity
-	devReadErrorsIncreased   notifier.Severity
-	devWriteErrorsIncreased  notifier.Severity
-	devCksumErrorsIncreased  notifier.Severity
-	devAdditionalInfoChanged notifier.Severity
-	devAdditionalInfoCleared notifier.Severity
-}
 
 // ZFS pool disk usage.
 type PoolUsageType struct {
@@ -427,15 +333,15 @@ func checkZpoolStatus(os, ns []*PoolType) {
 	// go through old pool list to check for disappeared pools:
 	for name := range os_pools {
 		if ns_pools[name] == nil {
-			notify.Printf(sevCfg.poolRemoved, `pool "%s" removed`, name)
+			notify.Printf(cfg.Severity.Poolremoved, `pool "%s" removed`, name)
 		}
 	}
 	// go though new pool list:
 	for name := range ns_pools {
 		// check for new pools:
 		if os_pools[name] == nil {
-			notify.Printf(sevCfg.poolAdded, `pool "%s" added`, name)
-			trackNotifications(notificationSev, name, sevCfg.poolAdded)
+			notify.Printf(cfg.Severity.Pooladded, `pool "%s" added`, name)
+			trackNotifications(notificationSev, name, cfg.Severity.Pooladded)
 			continue
 		}
 		// pre-existing pool
@@ -456,9 +362,9 @@ func checkZpoolStatus(os, ns []*PoolType) {
 				continue
 			}
 			if ns_devs[dname] == nil {
-				notify.Printf(sevCfg.devRemoved, `pool "%s" device "%s" removed`,
+				notify.Printf(cfg.Severity.Devremoved, `pool "%s" device "%s" removed`,
 					name, dname)
-				trackNotifications(notificationSev, name, sevCfg.devRemoved)
+				trackNotifications(notificationSev, name, cfg.Severity.Devremoved)
 			}
 		}
 		for dname := range ns_devs {
@@ -468,75 +374,75 @@ func checkZpoolStatus(os, ns []*PoolType) {
 			}
 			// check for new devices:
 			if os_devs[dname] == nil {
-				notify.Printf(sevCfg.devAdded, `pool "%s" device "%s" added`,
+				notify.Printf(cfg.Severity.Devadded, `pool "%s" device "%s" added`,
 					name, dname)
-				trackNotifications(notificationSev, name, sevCfg.devAdded)
+				trackNotifications(notificationSev, name, cfg.Severity.Devadded)
 				continue
 			}
 			// pre-existing device, perform checks to find changes:
 			if ns_devs[dname].read > os_devs[dname].read {
-				notify.Printf(sevCfg.devReadErrorsIncreased,
+				notify.Printf(cfg.Severity.Devreaderrorsincreased,
 					`pool "%s" device "%s" read errors increased: %d -> %d`,
 					name, dname, os_devs[dname].read, ns_devs[dname].read)
-				trackNotifications(notificationSev, name, sevCfg.devReadErrorsIncreased)
+				trackNotifications(notificationSev, name, cfg.Severity.Devreaderrorsincreased)
 			}
 			if ns_devs[dname].write > os_devs[dname].write {
-				notify.Printf(sevCfg.devWriteErrorsIncreased,
+				notify.Printf(cfg.Severity.Devwriteerrorsincreased,
 					`pool "%s" device "%s" write errors increased: %d -> %d`,
 					name, dname, os_devs[dname].write, ns_devs[dname].write)
-				trackNotifications(notificationSev, name, sevCfg.devWriteErrorsIncreased)
+				trackNotifications(notificationSev, name, cfg.Severity.Devwriteerrorsincreased)
 			}
 			if ns_devs[dname].cksum > os_devs[dname].cksum {
-				notify.Printf(sevCfg.devCksumErrorsIncreased,
+				notify.Printf(cfg.Severity.Devcksumerrorsincreased,
 					`pool "%s" device "%s" cksum errors increased: %d -> %d`,
 					name, dname, os_devs[dname].cksum, ns_devs[dname].cksum)
-				trackNotifications(notificationSev, name, sevCfg.devCksumErrorsIncreased)
+				trackNotifications(notificationSev, name, cfg.Severity.Devcksumerrorsincreased)
 			}
 			if ns_devs[dname].state != os_devs[dname].state {
-				severity := sevCfg.devStateMap.getSeverity(ns_devs[dname].state)
+				severity := cfg.Severity.Devstatemap.getSeverity(ns_devs[dname].state)
 				notify.Printf(severity, `pool "%s" device "%s" state changed: %s -> %s`,
 					name, dname, os_devs[dname].state, ns_devs[dname].state)
 				trackNotifications(notificationSev, name, severity)
 				// set leds
 				if cfg.Leds.Enable && len(ns_devs[dname].subDevs) == 0 {
-					ledsToSet[dname] = getIbpiIdFromDevState(ns_devs[dname].state)
+					ledsToSet[dname] = cfg.Leds.Devstatemap.getIbpiId(ns_devs[dname].state)
 				}
 			}
 			if ns_devs[dname].rest != os_devs[dname].rest {
 				if ns_devs[dname].rest != "" {
-					notify.Printf(sevCfg.devAdditionalInfoChanged,
+					notify.Printf(cfg.Severity.Devadditionalinfochanged,
 						`pool "%s" device "%s" new additional info: %s`,
 						name, dname, ns_devs[dname].rest)
 					trackNotifications(notificationSev, name,
-						sevCfg.devAdditionalInfoChanged)
+						cfg.Severity.Devadditionalinfochanged)
 				} else {
-					notify.Printf(sevCfg.devAdditionalInfoCleared,
+					notify.Printf(cfg.Severity.Devadditionalinfocleared,
 						`pool "%s" device "%s" additional info cleared`,
 						name, dname)
 					trackNotifications(notificationSev, name,
-						sevCfg.devAdditionalInfoCleared)
+						cfg.Severity.Devadditionalinfocleared)
 				}
 			}
 		}
 		// check changes in the general pool information:
 		if ns_pools[name].status != os_pools[name].status {
 			if ns_pools[name].status != "" {
-				notify.Printf(sevCfg.poolStatusChanged, `pool "%s" new status: %s`,
+				notify.Printf(cfg.Severity.Poolstatuschanged, `pool "%s" new status: %s`,
 					name, ns_pools[name].status)
-				trackNotifications(notificationSev, name, sevCfg.poolStatusChanged)
+				trackNotifications(notificationSev, name, cfg.Severity.Poolstatuschanged)
 			} else {
-				notify.Printf(sevCfg.poolStatusCleared, `pool "%s" status cleared`,
+				notify.Printf(cfg.Severity.Poolstatuscleared, `pool "%s" status cleared`,
 					name)
-				trackNotifications(notificationSev, name, sevCfg.poolStatusCleared)
+				trackNotifications(notificationSev, name, cfg.Severity.Poolstatuscleared)
 			}
 		}
 		if ns_pools[name].errors != os_pools[name].errors {
-			notify.Printf(sevCfg.poolErrorsChanged, `pool "%s" new errors: %s`,
+			notify.Printf(cfg.Severity.Poolerrorschanged, `pool "%s" new errors: %s`,
 				name, ns_pools[name].errors)
-			trackNotifications(notificationSev, name, sevCfg.poolErrorsChanged)
+			trackNotifications(notificationSev, name, cfg.Severity.Poolerrorschanged)
 		}
 		if ns_pools[name].state != os_pools[name].state {
-			severity := sevCfg.poolStateMap.getSeverity(ns_pools[name].state)
+			severity := cfg.Severity.Poolstatemap.getSeverity(ns_pools[name].state)
 			notify.Printf(severity, `pool "%s" state changed: %s -> %s`,
 				name, os_pools[name].state, ns_pools[name].state)
 			trackNotifications(notificationSev, name, severity)
@@ -559,11 +465,10 @@ func setupLeds(state []*PoolType) {
 	for _, pool := range state {
 		for _, dev := range pool.devs {
 			if len(dev.subDevs) == 0 {
-				ledsToSet[dev.name] = getIbpiIdFromDevState(dev.state)
+				ledsToSet[dev.name] = cfg.Leds.Devstatemap.getIbpiId(dev.state)
 			}
 		}
 	}
-
 	setDevLeds(ledsToSet)
 }
 
@@ -587,197 +492,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with zfswatcher. If not, see <http://www.gnu.org/licenses/>.
 `)
-}
-
-// Finds an entry in stateToSeverityMap, returns INFO as default.
-func (ssmap stateToSeverityMap) getSeverity(str string) notifier.Severity {
-	sev, ok := ssmap[str]
-	if !ok {
-		sev = notifier.INFO
-	}
-	return sev
-}
-
-// Parses a string which describes how to map "state" strings to severity levels.
-func parseStateToSeverityMap(str string) (stateToSeverityMap, error) {
-	ssmap := make(stateToSeverityMap)
-
-	for _, entry := range strings.Fields(str) {
-		pair := strings.SplitN(entry, ":", 2)
-		if len(pair) < 2 {
-			return nil, errors.New(`invalid map entry "` + entry + `"`)
-		}
-		sev, err := notifier.GetSeverityCode(pair[1])
-		if err != nil {
-			return nil, err
-		}
-		ssmap[pair[0]] = sev
-	}
-	return ssmap, nil
-}
-
-// Convert severity string to notifier.SEVERITY (or use default unless defined). Complain
-// about errors.
-func getSevCfg(sevStr string, cfgFile *string, errLabel string, defaultSev notifier.Severity) (sev notifier.Severity) {
-	if sevStr != "" {
-		var err error
-		sev, err = notifier.GetSeverityCode(sevStr)
-		checkCfgErr(*cfgFile, "severity", "", errLabel, err)
-	} else {
-		sev = defaultSev
-	}
-	return sev
-}
-
-// Check for and notify about configuration error.
-func checkCfgErr(cfgfile, sect, prof, param string, err error) {
-	if err == nil {
-		return
-	}
-	var sectprof string
-	switch {
-	case sect != "" && prof != "":
-		sectprof = ` [` + sect + ` "` + prof + `"]`
-	case sect != "":
-		sectprof = ` [` + sect + `]`
-	}
-	if param != "" {
-		param = ` parameter "` + param + `"`
-	}
-	fmt.Fprintf(os.Stderr, "%s: Error in %s%s%s: %s\n", os.Args[0], cfgfile, sectprof, param, err)
-	os.Exit(2)
-}
-
-// Setup configuration and logging.
-func setup() {
-	// ensure that zpool/zfs commands do not use localized messages:
-	os.Setenv("LC_ALL", "C")
-
-	// command line flags:
-	cfgFile := pflag.StringP("conf", "c", CFGFILE, "configuration file path")
-	optDebug = pflag.BoolP("debug", "d", false, "print debug information to stdout")
-	optHashPassword := pflag.BoolP("passwordhash", "P", false, "hash web password")
-	optTest := pflag.BoolP("test", "t", false, "test configuration and exit")
-	optVersion := pflag.BoolP("version", "v", false, "print version information and exit")
-
-	pflag.Parse()
-
-	if pflag.NArg() > 0 {
-		pflag.Usage()
-		os.Exit(2)
-	}
-	if *optVersion {
-		version()
-		os.Exit(0)
-	}
-	if *optHashPassword {
-		wwwHashPassword()
-		os.Exit(0)
-	}
-
-	// initialize logging & notification:
-	notify = notifier.New()
-
-	if *optDebug || *optTest {
-		notify.AddLoggerStdout(notifier.DEBUG)
-	}
-
-	// set up some sane default configuration settings:
-	cfg.Main.Zpoolstatusrefresh = 10
-	cfg.Main.Zpoolstatuscmd = "zpool status"
-	cfg.Main.Zfslistrefresh = 60
-	cfg.Main.Zfslistcmd = "zfs list -H -o name,avail,used,usedsnap,usedds,usedrefreserv,usedchild,refer,mountpoint -d 0"
-	cfg.Main.Zfslistusagecmd = "zfs list -H -o name,avail,used,usedsnap,usedds,usedrefreserv,usedchild,refer,mountpoint -r -t all"
-	cfg.Leds.Ledctlcmd = "ledctl"
-
-	// read configuration settings:
-	err := gcfg.ReadFileInto(&cfg, *cfgFile)
-	checkCfgErr(*cfgFile, "", "", "", err)
-
-	if cfg.Severity.Poolstatemap != "" {
-		sevCfg.poolStateMap, err = parseStateToSeverityMap(cfg.Severity.Poolstatemap)
-		checkCfgErr(*cfgFile, "severity", "", "poolstatemap", err)
-	}
-	sevCfg.poolAdded = getSevCfg(cfg.Severity.Pooladded,
-		cfgFile, "pooladded", notifier.INFO)
-	sevCfg.poolRemoved = getSevCfg(cfg.Severity.Poolremoved,
-		cfgFile, "poolremoved", notifier.INFO)
-	sevCfg.poolStatusChanged = getSevCfg(cfg.Severity.Poolstatuschanged,
-		cfgFile, "poolstatuschanged", notifier.INFO)
-	sevCfg.poolStatusCleared = getSevCfg(cfg.Severity.Poolstatuscleared,
-		cfgFile, "poolstatuscleared", notifier.INFO)
-	sevCfg.poolErrorsChanged = getSevCfg(cfg.Severity.Poolerrorschanged,
-		cfgFile, "poolerrorschanged", notifier.INFO)
-
-	if cfg.Severity.Devstatemap != "" {
-		sevCfg.devStateMap, err = parseStateToSeverityMap(cfg.Severity.Devstatemap)
-		checkCfgErr(*cfgFile, "severity", "", "devstatemap", err)
-	}
-	sevCfg.devAdded = getSevCfg(cfg.Severity.Devadded,
-		cfgFile, "devadded", notifier.INFO)
-	sevCfg.devRemoved = getSevCfg(cfg.Severity.Devremoved,
-		cfgFile, "devremoved", notifier.INFO)
-	sevCfg.devReadErrorsIncreased = getSevCfg(cfg.Severity.Devreaderrorsincreased,
-		cfgFile, "devreaderrorsincreased", notifier.INFO)
-	sevCfg.devWriteErrorsIncreased = getSevCfg(cfg.Severity.Devwriteerrorsincreased,
-		cfgFile, "devwriteerrorsincreased", notifier.INFO)
-	sevCfg.devCksumErrorsIncreased = getSevCfg(cfg.Severity.Devcksumerrorsincreased,
-		cfgFile, "devcksumerrorsincreased", notifier.INFO)
-	sevCfg.devAdditionalInfoChanged = getSevCfg(cfg.Severity.Devadditionalinfochanged,
-		cfgFile, "devadditionalinfochanged", notifier.INFO)
-	sevCfg.devAdditionalInfoCleared = getSevCfg(cfg.Severity.Devadditionalinfocleared,
-		cfgFile, "devadditionalinfocleared", notifier.INFO)
-
-	if cfg.Leds.Devstatemap != "" {
-		devStateToIbpiMap, err = parseDevStateToIbpiMap(cfg.Leds.Devstatemap)
-		checkCfgErr(*cfgFile, "leds", "", "devstatemap", err)
-	}
-
-	for prof, c := range cfg.Logfile {
-		if c.Enable {
-			sev, err := notifier.GetSeverityCode(c.Level)
-			checkCfgErr(*cfgFile, "logfile", prof, "level", err)
-			err = notify.AddLoggerFile(sev, c.File)
-			checkCfgErr(*cfgFile, "logfile", prof, "", err)
-		}
-	}
-	for prof, c := range cfg.Syslog {
-		if c.Enable {
-			sev, err := notifier.GetSeverityCode(c.Level)
-			checkCfgErr(*cfgFile, "syslog", prof, "level", err)
-			fac, err := notifier.GetSyslogFacilityCode(c.Facility)
-			checkCfgErr(*cfgFile, "syslog", prof, "facility", err)
-			err = notify.AddLoggerSyslog(sev, c.Server, fac)
-			checkCfgErr(*cfgFile, "syslog", prof, "", err)
-		}
-	}
-	for prof, c := range cfg.Email {
-		if c.Enable {
-			sev, err := notifier.GetSeverityCode(c.Level)
-			checkCfgErr(*cfgFile, "email", prof, "level", err)
-			err = notify.AddLoggerEmailSMTP(sev,
-				c.Server, c.Username, c.Password, c.From, c.To, c.Subject,
-				time.Second*time.Duration(c.Throttle))
-			checkCfgErr(*cfgFile, "email", prof, "", err)
-		}
-	}
-	if cfg.Www.Enable && cfg.Www.Logbuffer > 0 {
-		sev, err := notifier.GetSeverityCode(cfg.Www.Level)
-		checkCfgErr(*cfgFile, "www", "", "level", err)
-		err = notify.AddLoggerCallback(sev, wwwLogReceiver)
-		checkCfgErr(*cfgFile, "www", "", "", err)
-	}
-	if cfg.Www.Enable {
-		wwwSevClass, err = parseWwwSeverityToClassMap(cfg.Www.Severitycssclassmap)
-		checkCfgErr(*cfgFile, "www", "", "severitycssclassmap", err)
-		wwwPoolStateClass, err = parseStringMap(cfg.Www.Poolstatecssclassmap)
-		checkCfgErr(*cfgFile, "www", "", "poolstatecssclassmap", err)
-		wwwDevStateClass, err = parseStringMap(cfg.Www.Devstatecssclassmap)
-		checkCfgErr(*cfgFile, "www", "", "devstatecssclassmap", err)
-	}
-	if *optTest {
-		os.Exit(0)
-	}
 }
 
 // The main program.

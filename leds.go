@@ -23,6 +23,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -76,8 +77,6 @@ var ibpiToLedCtl = map[ibpiID]string{
 	IBPI_FAILED_ARRAY:   "failed_array", // ei toimi
 }
 
-var devStateToIbpiMap map[string]ibpiID
-
 type devLed struct {
 	name   string
 	path   string
@@ -90,37 +89,46 @@ var (
 	devLedsMutex sync.Mutex
 )
 
-func parseDevStateToIbpiMap(str string) (map[string]ibpiID, error) {
-	simap := make(map[string]ibpiID)
+type devStateToIbpiMap map[string]ibpiID
 
-	for _, entry := range strings.Fields(str) {
-		pair := strings.SplitN(entry, ":", 2)
-		if len(pair) < 2 {
-			return nil, errors.New(`invalid map entry "` + entry + `"`)
-		}
-		id, err := getIbpiId(pair[1])
-		if err != nil {
-			return nil, err
-		}
-		simap[pair[0]] = id
+// Implement fmt.Scanner interface.
+func (simapp *devStateToIbpiMap) Scan(state fmt.ScanState, verb rune) error {
+	smap, err := ScanMapHelper(state, verb)
+	if err != nil {
+		return err
 	}
-	return simap, nil
+	simap := make(devStateToIbpiMap)
+	for a, b := range smap {
+		var id ibpiID
+		if n, err := fmt.Sscan(b, &id); n != 1 {
+			return err
+		}
+		simap[a] = id
+	}
+	*simapp = simap
+	return nil
 }
 
-func getIbpiIdFromDevState(str string) ibpiID {
-	id, ok := devStateToIbpiMap[str]
+// Implement fmt.Scanner interface.
+func (i *ibpiID) Scan(state fmt.ScanState, verb rune) error {
+	ibpistr, err := state.Token(false, func(r rune) bool { return true })
+	if err != nil {
+		return err
+	}
+	ibpiid, ok := ibpiNameToId[string(ibpistr)]
+	if !ok {
+		return errors.New(`invalid IBPI string "` + string(ibpistr) + `"`)
+	}
+	*i = ibpiid
+	return nil
+}
+
+func (simap devStateToIbpiMap) getIbpiId(str string) ibpiID {
+	id, ok := simap[str]
 	if !ok {
 		return IBPI_NORMAL
 	}
 	return id
-}
-
-func getIbpiId(str string) (ibpiID, error) {
-	id, ok := ibpiNameToId[str]
-	if !ok {
-		return IBPI_NORMAL, errors.New(`unknown IBPI string "` + str + `"`)
-	}
-	return id, nil
 }
 
 func setDevLeds(devandled map[string]ibpiID) {

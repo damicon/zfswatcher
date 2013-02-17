@@ -35,7 +35,22 @@ import (
 
 // Message severity levels, conforms to the syslog severity levels:
 
+// Severity level.
 type Severity uint32
+
+// Implement fmt.Scanner interface.
+func (s *Severity) Scan(state fmt.ScanState, verb rune) error {
+	sevstr, err := state.Token(false, func(r rune) bool { return true })
+	if err != nil {
+		return err
+	}
+	sev, ok := severityCodes[string(sevstr)]
+	if !ok {
+		return errors.New(`invalid severity "` + string(sevstr) + `"`)
+	}
+	*s = sev
+	return nil
+}
 
 const (
 	severity_MIN Severity = 0

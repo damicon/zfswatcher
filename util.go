@@ -213,20 +213,6 @@ func legalPoolName(str string) bool {
 	return false
 }
 
-// Parse a string map.
-func parseStringMap(str string) (map[string]string, error) {
-	smap := make(map[string]string)
-
-	for _, entry := range strings.Fields(str) {
-		pair := strings.SplitN(entry, ":", 2)
-		if len(pair) < 2 {
-			return nil, errors.New(`invalid map entry "` + entry + `"`)
-		}
-		smap[pair[0]] = pair[1]
-	}
-	return smap, nil
-}
-
 // Write our pid to a file.
 func makePidFile(filename string) (err error) {
 	f, err := os.Create(filename)
