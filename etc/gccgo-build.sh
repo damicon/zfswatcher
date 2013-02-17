@@ -42,7 +42,7 @@ compile_go_package github.com/ogier/pflag \
 compile_go_package github.com/snabb/smtp \
 	smtp.go auth.go
 compile_go_package zfswatcher.damicon.fi/notifier \
-	notifier.go
+	notifier.go facility.go severity.go msg.go logger_*.go
 
 set -x
 $GCCGO -I $INC -o zfswatcher \
