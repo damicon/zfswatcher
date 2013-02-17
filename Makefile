@@ -48,6 +48,7 @@ all: zfswatcher
 
 version.go:
 	(echo "package main" ; \
+	echo "" ; \
 	echo "const VERSION = \"$(VERSION)\"") > version.go
 
 zfswatcher: zfswatcher.go leds.go util.go webserver.go version.go osutil_linux.go osutil_freebsd.go
