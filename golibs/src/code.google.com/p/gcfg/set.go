@@ -73,10 +73,10 @@ func set(cfg interface{}, sect, sub, name, value string) error {
 	n, err := fmt.Sscanf(value, "%v%c", vAddr, &r)
 	switch {
 	case n < 1 || n == 1 && err != io.EOF:
-		return fmt.Errorf("failed to parse %q as %#v: parse error %v", value,
+		return fmt.Errorf("failed to parse %q as %v: parse error %v", value,
 			vName.Type(), err)
 	case n > 1:
-		return fmt.Errorf("failed to parse %q as %#v: extra characters", value,
+		return fmt.Errorf("failed to parse %q as %v: extra characters", value,
 			vName.Type())
 	case n == 1 && err == io.EOF:
 		return nil
