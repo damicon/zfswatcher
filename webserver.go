@@ -135,7 +135,7 @@ func wwwLogReceiver(m *notifier.Msg) {
 	switch m.MsgType {
 	case notifier.MSGTYPE_MESSAGE:
 		nm := &logMsgWeb{}
-		nm.Time, nm.Severity, nm.Text = m.MsgToStrings()
+		nm.Time, nm.Severity, nm.Text = m.Strings()
 		nm.Class = cfg.Www.Severitycssclassmap[m.Severity]
 		wwwLogBuffer = append(wwwLogBuffer, nm)
 	case notifier.MSGTYPE_ATTACHMENT:
@@ -146,7 +146,7 @@ func wwwLogReceiver(m *notifier.Msg) {
 		} else {
 			// make a new entry only with the attachment
 			nm := &logMsgWeb{}
-			nm.Time, nm.Severity, nm.Attachment = m.MsgToStrings()
+			nm.Time, nm.Severity, nm.Attachment = m.Strings()
 			nm.Class = cfg.Www.Severitycssclassmap[m.Severity]
 			wwwLogBuffer = append(wwwLogBuffer, nm)
 		}

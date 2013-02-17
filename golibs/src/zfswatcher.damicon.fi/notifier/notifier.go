@@ -33,120 +33,15 @@ import (
 	"time"
 )
 
-// Message severity levels, conforms to the syslog severity levels:
-
-// Severity level.
-type Severity uint32
-
-const (
-	severity_MIN Severity = 0
-	EMERG        Severity = 0
-	ALERT        Severity = 1
-	CRIT         Severity = 2
-	ERR          Severity = 3
-	WARNING      Severity = 4
-	NOTICE       Severity = 5
-	INFO         Severity = 6
-	DEBUG        Severity = 7
-	severity_MAX Severity = 7
-)
-
-var severityStrings = []string{
-	EMERG:   "emerg",
-	ALERT:   "alert",
-	CRIT:    "crit",
-	ERR:     "err",
-	WARNING: "warning",
-	NOTICE:  "notice",
-	INFO:    "info",
-	DEBUG:   "debug",
-}
-
-var severityCodes = map[string]Severity{
-	"emerg":   EMERG,
-	"alert":   ALERT,
-	"crit":    CRIT,
-	"err":     ERR,
-	"error":   ERR,
-	"warn":    WARNING,
-	"warning": WARNING,
-	"notice":  NOTICE,
-	"info":    INFO,
-	"debug":   DEBUG,
-}
-
-// Syslog message facility codes:
-
-type SyslogFacility uint32
-
-const (
-	syslog_FACILITY_MIN      SyslogFacility = 0
-	syslog_FACILITY_KERN     SyslogFacility = 0
-	syslog_FACILITY_USER     SyslogFacility = 1
-	syslog_FACILITY_MAIL     SyslogFacility = 2
-	syslog_FACILITY_DAEMON   SyslogFacility = 3
-	syslog_FACILITY_AUTH     SyslogFacility = 4
-	syslog_FACILITY_SYSLOG   SyslogFacility = 5
-	syslog_FACILITY_LPR      SyslogFacility = 6
-	syslog_FACILITY_NEWS     SyslogFacility = 7
-	syslog_FACILITY_UUCP     SyslogFacility = 8
-	syslog_FACILITY_CRON     SyslogFacility = 9
-	syslog_FACILITY_AUTHPRIV SyslogFacility = 10
-	syslog_FACILITY_FTP      SyslogFacility = 11
-	syslog_FACILITY_LOCAL0   SyslogFacility = 16
-	syslog_FACILITY_LOCAL1   SyslogFacility = 17
-	syslog_FACILITY_LOCAL2   SyslogFacility = 18
-	syslog_FACILITY_LOCAL3   SyslogFacility = 19
-	syslog_FACILITY_LOCAL4   SyslogFacility = 20
-	syslog_FACILITY_LOCAL5   SyslogFacility = 21
-	syslog_FACILITY_LOCAL6   SyslogFacility = 22
-	syslog_FACILITY_LOCAL7   SyslogFacility = 23
-	syslog_FACILITY_MAX      SyslogFacility = 23
-)
-
-var syslogFacilityCodes = map[string]SyslogFacility{
-	"kern":     syslog_FACILITY_KERN,
-	"user":     syslog_FACILITY_USER,
-	"mail":     syslog_FACILITY_MAIL,
-	"daemon":   syslog_FACILITY_DAEMON,
-	"auth":     syslog_FACILITY_AUTH,
-	"syslog":   syslog_FACILITY_SYSLOG,
-	"lpr":      syslog_FACILITY_LPR,
-	"news":     syslog_FACILITY_NEWS,
-	"uucp":     syslog_FACILITY_UUCP,
-	"cron":     syslog_FACILITY_CRON,
-	"authpriv": syslog_FACILITY_AUTHPRIV,
-	"ftp":      syslog_FACILITY_FTP,
-	"local0":   syslog_FACILITY_LOCAL0,
-	"local1":   syslog_FACILITY_LOCAL1,
-	"local2":   syslog_FACILITY_LOCAL2,
-	"local3":   syslog_FACILITY_LOCAL3,
-	"local4":   syslog_FACILITY_LOCAL4,
-	"local5":   syslog_FACILITY_LOCAL5,
-	"local6":   syslog_FACILITY_LOCAL6,
-	"local7":   syslog_FACILITY_LOCAL7,
-}
-
 const retry_SLEEP = 500 // milliseconds
 const chan_SIZE = 32
 
-// Messages passed in the module internal channels:
-
-type MsgType int
-
+// Define the date/time format for outputs.
 const (
-	MSGTYPE_MESSAGE    MsgType = iota // normal log message
-	MSGTYPE_ATTACHMENT                // additional verbose information
-	MSGTYPE_FLUSH                     // send messages to delayed destinations (e-mail)
-	MSGTYPE_REOPEN                    // re-open output file after log rotation etc
+	time_FORMAT = "15:04:05"
+	date_FORMAT = "2006-01-02"
+	date_time_FORMAT = "2006-01-02 15:04:05"
 )
-
-type Msg struct {
-	Time     time.Time
-	MsgType  MsgType
-	Severity Severity
-	Text     string
-}
 
 // private
 
@@ -155,7 +50,8 @@ func internalError(str string) {
 	// What should be done with these errors?
 	// Right now we just write the errors to STDERR.
 	// This is not a good solution.
-	fmt.Fprintf(os.Stderr, "%s [NOTIFIER] %s\n", time.Now().Format("2006-01-02 15:04:05"), str)
+	fmt.Fprintf(os.Stderr, "%s [NOTIFIER] %s\n",
+		time.Now().Format(date_time_FORMAT), str)
 }
 
 func checkInternalError(str string, err error) {
@@ -164,30 +60,12 @@ func checkInternalError(str string, err error) {
 	}
 }
 
-func (m *Msg) MsgToStrings() (string, string, string) {
-	return m.Time.Format("2006-01-02 15:04:05"),
-		severityStrings[m.Severity],
-		m.Text
-}
-
-func (m *Msg) MsgToStringDateTime() string {
-	return m.Time.Format("2006-01-02 15:04:05") +
-		" [" + severityStrings[m.Severity] + "] " +
-		m.Text
-}
-
-func (m *Msg) MsgToStringTime() string {
-	return m.Time.Format("15:04:05") +
-		" [" + severityStrings[m.Severity] + "] " +
-		m.Text
-}
-
 func (n *Notifier) loggerStdout(ch chan *Msg) {
 	defer n.wg.Done()
 	for m := range ch {
 		switch m.MsgType {
 		case MSGTYPE_MESSAGE:
-			fmt.Println(m.MsgToStringDateTime())
+			fmt.Println(m.String())
 		case MSGTYPE_ATTACHMENT:
 			fmt.Println(">" + strings.Replace(strings.TrimRight(m.Text, "\n"), "\n", "\n>", -1))
 		}
@@ -214,7 +92,7 @@ func (n *Notifier) loggerFile(ch chan *Msg, filename string) {
 			if !fileopen {
 				continue
 			}
-			_, err = f.WriteString(m.MsgToStringDateTime() + "\n")
+			_, err = f.WriteString(m.String() + "\n")
 			checkInternalError("error writing log file", err)
 		case MSGTYPE_ATTACHMENT:
 			if !fileopen {
@@ -245,11 +123,6 @@ func (n *Notifier) loggerFile(ch chan *Msg, filename string) {
 }
 
 // This implements the BSD style syslog protocol.
-
-func (m *Msg) msgToSyslogString(facility SyslogFacility, tag string) string {
-	return fmt.Sprintf("<%d>%s %s: %s", uint32(m.Severity)|(uint32(facility)<<3),
-		m.Time.Format(time.Stamp), tag, m.Text)
-}
 
 func connectSyslog(address string) (net.Conn, bool, error) {
 	conntype := "udp"
@@ -294,7 +167,7 @@ func (n *Notifier) loggerSyslog(ch chan *Msg, address string, facility SyslogFac
 	for m := range ch {
 		switch m.MsgType {
 		case MSGTYPE_MESSAGE:
-			buf := []byte(m.msgToSyslogString(facility, tag))
+			buf := []byte(m.SyslogString(facility, tag))
 
 			if sep {
 				if len(buf) > 1023 {
@@ -413,7 +286,7 @@ func (n *Notifier) loggerEmailSMTP(ch chan *Msg, server, username, password, fro
 		}
 		switch m.MsgType {
 		case MSGTYPE_MESSAGE:
-			mbuf = append(mbuf, m.MsgToStringTime())
+			mbuf = append(mbuf, m.TimeString())
 			if m.Severity < severityTrack {
 				// keep track of worst severity within a batch of messages
 				severityTrack = m.Severity
@@ -436,7 +309,7 @@ func (n *Notifier) loggerEmailSMTP(ch chan *Msg, server, username, password, fro
 				continue
 			}
 			mbuf, abuf = nil, nil
-			sevsubject := subject + " [" + severityStrings[severityTrack] + "]"
+			sevsubject := subject + " [" + severityTrack.String() + "]"
 			severityTrack = DEBUG
 			lastFlush = time.Now()
 			if throttleTimer != nil {
@@ -453,7 +326,7 @@ func (n *Notifier) loggerEmailSMTP(ch chan *Msg, server, username, password, fro
 	}
 	// send the last entries:
 	if text := makeEmailText(mbuf, abuf); text != "" {
-		sevsubject := subject + " [" + severityStrings[severityTrack] + "]"
+		sevsubject := subject + " [" + severityTrack.String() + "]"
 		n.wg.Add(1)
 		go n.sendEmailSMTP(server, username, password, from, to, sevsubject, text)
 	}
@@ -495,34 +368,6 @@ func (n *Notifier) dispatcher() {
 }
 
 // public API
-
-// Implement fmt.Scanner interface.
-func (s *Severity) Scan(state fmt.ScanState, verb rune) error {
-	sevstr, err := state.Token(false, func(r rune) bool { return true })
-	if err != nil {
-		return err
-	}
-	sev, ok := severityCodes[string(sevstr)]
-	if !ok {
-		return errors.New(`invalid severity "` + string(sevstr) + `"`)
-	}
-	*s = sev
-	return nil
-}
-
-// Implement fmt.Scanner interface.
-func (f *SyslogFacility) Scan(state fmt.ScanState, verb rune) error {
-	facstr, err := state.Token(false, func(r rune) bool { return true })
-	if err != nil {
-		return err
-	}
-	fac, ok := syslogFacilityCodes[string(facstr)]
-	if !ok {
-		return errors.New(`invalid facility "` + string(facstr) + `"`)
-	}
-	*f = fac
-	return nil
-}
 
 type notifyOutput struct {
 	severity   Severity
