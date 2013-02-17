@@ -2,6 +2,14 @@
 
                            version history
 
+version 0.3 released 2013-02-20
+
+ - Experimental FreeBSD and OpenIndiana support.
+
+ - Reconfigure on SIGHUP.
+
+ - Ubuntu ZFS PPA dependency fix.
+
 version 0.2 released 2013-02-04
 
  - Compatibility fix for changes in ZoL 0.6.0-rc14 output formatting.
