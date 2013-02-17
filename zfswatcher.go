@@ -592,9 +592,8 @@ MAINLOOP:
 		case <-sigCexit:
 			break MAINLOOP
 		case <-sigChup:
-			notify.Print(notifier.DEBUG, "flushing and reopening logs")
-			notify.Flush()
-			notify.Reopen()
+			notify.Print(notifier.DEBUG, "reconfiguring, reopening logs")
+			reconfigure()
 		case <-sigCusr1:
 			var memstats runtime.MemStats
 			runtime.ReadMemStats(&memstats)
@@ -612,7 +611,6 @@ EXIT:
 	// XXX persist data?
 
 	// ask logger to stop:
-	notify.Flush()
 	notifyCloseC := notify.Close()
 
 	// wait a moment for logger goroutines to quit so that we get the last log messages:

@@ -184,8 +184,10 @@ func checkCfgErr(cfgfile, sect, prof, param string, err error, errorSeen *bool) 
 	if param != "" {
 		param = ` parameter "` + param + `"`
 	}
-	// XXX use notifier?
 	fmt.Fprintf(os.Stderr, "%s: Error in %s%s%s: %s\n", os.Args[0], cfgfile, sectprof, param, err)
+	if notify != nil {
+		notify.Printf(notifier.CRIT, "Error in %s%s%s: %s", cfgfile, sectprof, param, err)
+	}
 	*errorSeen = true
 }
 
@@ -257,9 +259,6 @@ func setupLog(c *cfgType) *notifier.Notifier {
 		err := n.AddLoggerCallback(c.Www.Level, wwwLogReceiver)
 		checkCfgErr(cfgFile, "www", "", "", err, &errorSeen)
 	}
-	if errorSeen == true {
-		return nil
-	}
 	return n
 }
 
@@ -303,8 +302,31 @@ func setup() {
 	notify = setupLog(cfg)
 
 	if *optTest {
+		notifyCloseC := notify.Close()
+		select { // wait max 1 second for loggers to finish
+		case <-notifyCloseC:
+		case <-time.After(time.Second):
+		}
 		os.Exit(0)
 	}
+}
+
+// Reconfigure event (usually SIGHUP).
+func reconfigure() {
+	newcfg := getCfg()
+	if newcfg == nil {
+		notify.Send(notifier.CRIT, "invalid configuration " + cfgFile + ", keeping old configuration")
+		return
+	}
+	cfg = newcfg
+	newNotify := setupLog(cfg)
+	if newNotify == nil {
+		notify.Send(notifier.CRIT, "error setting up logs, keeping old logging configuration")
+	}
+	oldnotify := notify
+	notify = newNotify
+	oldnotify.Close()
+	// XXX restart web
 }
 
 // eof
