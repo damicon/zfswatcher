@@ -18,7 +18,7 @@
 .\" You should have received a copy of the GNU General Public License
 .\" along with zfswatcher. If not, see <http://www.gnu.org/licenses/>.
 .\"
-.TH ZFSWATCHER 8 "2013-02-08" "version 0.03"
+.TH ZFSWATCHER 8 "2013-02-18" "version 0.03"
 .SH NAME
 zfswatcher \- ZFS pool monitoring and notification daemon
 .SH SYNOPSIS
@@ -33,15 +33,15 @@ zfswatcher \- ZFS pool monitoring and notification daemon
 The
 .B zfswatcher
 daemon periodically checks the ZFS pool status and sends notifications
-about any changes according to the configuration settings. It also controls
-the disk enclosure LEDs and provides a web interface for viewing the ZFS
-status and logs.
+about any changes according to the configuration settings. It also optionally
+controls the disk enclosure LEDs and provides a web interface for viewing the
+ZFS status and logs.
 .SH OPTIONS
 .TP
 .BR \-c ", " \-\-conf " \fIconfig-file\fR"
 Use an alternate
 .I config-file
-instead of
+instead of the default
 .IR /etc/zfs/zfswatcher.conf .
 .TP
 .BR \-d ", " \-\-debug
@@ -59,8 +59,7 @@ Print version information and exit.
 .SH SIGNALS
 .TP
 .B SIGHUP
-Close and re-open the output log. Use in case you want to rotate
-the log file.
+Reload configuration and reopen logs.
 .TP
 .BR SIGTERM ", " SIGINT
 Terminate gracefully.
@@ -82,6 +81,12 @@ and
 to keep better control of the service. This can be worked around by
 using a tool such as 
 .BR start-stop-daemon (8).
+.PP
+Currently an external utility called
+.B ledctl
+which is part of the
+.B ledmon
+package is required for enclosure LED control.
 .SH COPYRIGHT
 Copyright \(co 2012-2013 Damicon Kraa Oy
 .br
