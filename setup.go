@@ -73,18 +73,18 @@ type cfgType struct {
 	}
 	Logfile map[string]*struct {
 		Enable bool
-		Level  string
+		Level  notifier.Severity
 		File   string
 	}
 	Syslog map[string]*struct {
 		Enable   bool
-		Level    string
+		Level    notifier.Severity
 		Server   string
-		Facility string
+		Facility notifier.SyslogFacility
 	}
 	Email map[string]*struct {
 		Enable   bool
-		Level    string
+		Level    notifier.Severity
 		Server   string
 		Username string
 		Password string
@@ -95,7 +95,7 @@ type cfgType struct {
 	}
 	Www struct {
 		Enable               bool
-		Level                string
+		Level                notifier.Severity
 		Logbuffer            int
 		Bind                 string
 		Templatedir          string
@@ -184,6 +184,7 @@ func checkCfgErr(cfgfile, sect, prof, param string, err error, errorSeen *bool) 
 	if param != "" {
 		param = ` parameter "` + param + `"`
 	}
+	// XXX use notifier?
 	fmt.Fprintf(os.Stderr, "%s: Error in %s%s%s: %s\n", os.Args[0], cfgfile, sectprof, param, err)
 	*errorSeen = true
 }
@@ -217,45 +218,49 @@ func getCfg() *cfgType {
 	err := gcfg.ReadFileInto(&c, cfgFile)
 	checkCfgErr(cfgFile, "", "", "", err, &errorSeen)
 
-	// setup logging
+	if errorSeen {
+		return nil
+	}
+	return &c
+}
+
+// Setup logging.
+func setupLog(c *cfgType) *notifier.Notifier {
+	var errorSeen bool
+
+	n := notifier.New()
+	if optDebug {
+		n.AddLoggerStdout(notifier.DEBUG)
+	}
+
 	for prof, s := range c.Logfile {
 		if s.Enable {
-			sev, err := notifier.GetSeverityCode(s.Level)
-			checkCfgErr(cfgFile, "logfile", prof, "level", err, &errorSeen)
-			err = notify.AddLoggerFile(sev, s.File)
+			err := n.AddLoggerFile(s.Level, s.File)
 			checkCfgErr(cfgFile, "logfile", prof, "", err, &errorSeen)
 		}
 	}
 	for prof, s := range c.Syslog {
 		if s.Enable {
-			sev, err := notifier.GetSeverityCode(s.Level)
-			checkCfgErr(cfgFile, "syslog", prof, "level", err, &errorSeen)
-			fac, err := notifier.GetSyslogFacilityCode(s.Facility)
-			checkCfgErr(cfgFile, "syslog", prof, "facility", err, &errorSeen)
-			err = notify.AddLoggerSyslog(sev, s.Server, fac)
+			err := n.AddLoggerSyslog(s.Level, s.Server, s.Facility)
 			checkCfgErr(cfgFile, "syslog", prof, "", err, &errorSeen)
 		}
 	}
 	for prof, s := range c.Email {
 		if s.Enable {
-			sev, err := notifier.GetSeverityCode(s.Level)
-			checkCfgErr(cfgFile, "email", prof, "level", err, &errorSeen)
-			err = notify.AddLoggerEmailSMTP(sev,
+			err := n.AddLoggerEmailSMTP(s.Level,
 				s.Server, s.Username, s.Password, s.From, s.To, s.Subject,
 				time.Second*time.Duration(s.Throttle))
 			checkCfgErr(cfgFile, "email", prof, "", err, &errorSeen)
 		}
 	}
 	if c.Www.Enable && c.Www.Logbuffer > 0 {
-		sev, err := notifier.GetSeverityCode(c.Www.Level)
-		checkCfgErr(cfgFile, "www", "", "level", err, &errorSeen)
-		err = notify.AddLoggerCallback(sev, wwwLogReceiver)
+		err := n.AddLoggerCallback(c.Www.Level, wwwLogReceiver)
 		checkCfgErr(cfgFile, "www", "", "", err, &errorSeen)
 	}
-	if errorSeen {
+	if errorSeen == true {
 		return nil
 	}
-	return &c
+	return n
 }
 
 // Initial setup when the program starts.
@@ -265,7 +270,7 @@ func setup() {
 
 	// command line flags:
 	pflag.StringVarP(&cfgFile, "conf", "c", CFGFILE, "configuration file path")
-	optDebug = pflag.BoolP("debug", "d", false, "print debug information to stdout")
+	pflag.BoolVarP(&optDebug, "debug", "d", false, "print debug information to stdout")
 	optHashPassword := pflag.BoolP("passwordhash", "P", false, "hash web password")
 	optTest := pflag.BoolP("test", "t", false, "test configuration and exit")
 	optVersion := pflag.BoolP("version", "v", false, "print version information and exit")
@@ -286,13 +291,16 @@ func setup() {
 	}
 
 	// initialize logging & notification:
-	notify = notifier.New()
 
-	if *optDebug || *optTest {
-		notify.AddLoggerStdout(notifier.DEBUG)
+	if *optTest {
+		optDebug = true
 	}
 
 	cfg = getCfg()
+	if cfg == nil {
+		os.Exit(2)
+	}
+	notify = setupLog(cfg)
 
 	if *optTest {
 		os.Exit(0)

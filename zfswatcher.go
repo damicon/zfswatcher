@@ -37,7 +37,7 @@ import (
 // Other global variables.
 
 var notify *notifier.Notifier
-var optDebug *bool
+var optDebug bool
 
 var currentState struct {
 	state []*PoolType
@@ -618,15 +618,15 @@ EXIT:
 	// wait a moment for logger goroutines to quit so that we get the last log messages:
 	select {
 	case <-notifyCloseC:
-		if *optDebug {
+		if optDebug {
 			fmt.Println("exiting now: logger finished")
 		}
 	case <-sigCexit:
-		if *optDebug {
+		if optDebug {
 			fmt.Println("exiting now: got another signal")
 		}
 	case <-time.After(time.Second * 10):
-		if *optDebug {
+		if optDebug {
 			fmt.Println("exiting now: timer elapsed")
 		}
 	}

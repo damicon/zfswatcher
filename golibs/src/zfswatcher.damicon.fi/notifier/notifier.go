@@ -38,20 +38,6 @@ import (
 // Severity level.
 type Severity uint32
 
-// Implement fmt.Scanner interface.
-func (s *Severity) Scan(state fmt.ScanState, verb rune) error {
-	sevstr, err := state.Token(false, func(r rune) bool { return true })
-	if err != nil {
-		return err
-	}
-	sev, ok := severityCodes[string(sevstr)]
-	if !ok {
-		return errors.New(`invalid severity "` + string(sevstr) + `"`)
-	}
-	*s = sev
-	return nil
-}
-
 const (
 	severity_MIN Severity = 0
 	EMERG        Severity = 0
@@ -510,20 +496,32 @@ func (n *Notifier) dispatcher() {
 
 // public API
 
-func GetSeverityCode(sevstr string) (sev Severity, err error) {
-	sev, ok := severityCodes[sevstr]
-	if !ok {
-		return 0, errors.New(`invalid severity "` + sevstr + `"`)
+// Implement fmt.Scanner interface.
+func (s *Severity) Scan(state fmt.ScanState, verb rune) error {
+	sevstr, err := state.Token(false, func(r rune) bool { return true })
+	if err != nil {
+		return err
 	}
-	return sev, nil
+	sev, ok := severityCodes[string(sevstr)]
+	if !ok {
+		return errors.New(`invalid severity "` + string(sevstr) + `"`)
+	}
+	*s = sev
+	return nil
 }
 
-func GetSyslogFacilityCode(facstr string) (fac SyslogFacility, err error) {
-	fac, ok := syslogFacilityCodes[facstr]
-	if !ok {
-		return 0, errors.New(`invalid facility "` + facstr + `"`)
+// Implement fmt.Scanner interface.
+func (f *SyslogFacility) Scan(state fmt.ScanState, verb rune) error {
+	facstr, err := state.Token(false, func(r rune) bool { return true })
+	if err != nil {
+		return err
 	}
-	return fac, nil
+	fac, ok := syslogFacilityCodes[string(facstr)]
+	if !ok {
+		return errors.New(`invalid facility "` + string(facstr) + `"`)
+	}
+	*f = fac
+	return nil
 }
 
 type notifyOutput struct {
