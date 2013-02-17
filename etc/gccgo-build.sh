@@ -47,7 +47,7 @@ compile_go_package zfswatcher.damicon.fi/notifier \
 set -x
 $GCCGO -I $INC -o zfswatcher \
 	zfswatcher.go leds.go util.go version.go webserver.go \
-	setup.go \
+	setup.go zparse.go \
 	osutil_$GOOS.go \
 	$subpackages
 
