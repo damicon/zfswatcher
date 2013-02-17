@@ -112,12 +112,13 @@ type cfgType struct {
 
 var cfg *cfgType
 
-func ScanMapHelper(state fmt.ScanState, verb rune) (map[string]string, error) {
-	smap := make(map[string]string)
+// Implement fmt.Scanner interface.
+func (ssmapp *stringToStringMap) Scan(state fmt.ScanState, verb rune) error {
+	smap := make(stringToStringMap)
 	for {
 		tok, err := state.Token(true, nil)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if len(tok) == 0 { // end of string
 			break
@@ -125,26 +126,18 @@ func ScanMapHelper(state fmt.ScanState, verb rune) (map[string]string, error) {
 		str := string(tok)
 		pair := strings.SplitN(str, ":", 2)
 		if len(pair) != 2 {
-			return nil, errors.New(`invalid map entry "` + str + `"`)
+			return errors.New(`invalid map entry "` + str + `"`)
 		}
 		smap[pair[0]] = pair[1]
-	}
-	return smap, nil
-}
-
-// Implement fmt.Scanner interface.
-func (ssmapp *stringToStringMap) Scan(state fmt.ScanState, verb rune) error {
-	smap, err := ScanMapHelper(state, verb)
-	if err != nil {
-		return err
 	}
 	*ssmapp = smap
 	return nil
 }
 
-// Implement fmt.Scanner interface.
+// Implement fmt.Scanner interface on top of other fmt.Scanner interface.
 func (ssmapp *stateToSeverityMap) Scan(state fmt.ScanState, verb rune) error {
-	smap, err := ScanMapHelper(state, verb)
+	smap := stringToStringMap{}
+	err := smap.Scan(state, verb)
 	if err != nil {
 		return err
 	}
@@ -315,7 +308,7 @@ func setup() {
 func reconfigure() {
 	newcfg := getCfg()
 	if newcfg == nil {
-		notify.Send(notifier.CRIT, "invalid configuration " + cfgFile + ", keeping old configuration")
+		notify.Send(notifier.CRIT, "invalid configuration "+cfgFile+", keeping old configuration")
 		return
 	}
 	cfg = newcfg

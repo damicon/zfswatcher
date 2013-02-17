@@ -39,7 +39,8 @@ type severityToWwwClassMap map[notifier.Severity]string
 
 // Implement fmt.Scanner interface.
 func (scmapp *severityToWwwClassMap) Scan(state fmt.ScanState, verb rune) error {
-	smap, err := ScanMapHelper(state, verb)
+	smap := stringToStringMap{}
+	err := smap.Scan(state, verb)
 	if err != nil {
 		return err
 	}

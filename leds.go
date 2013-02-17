@@ -93,7 +93,8 @@ type devStateToIbpiMap map[string]ibpiID
 
 // Implement fmt.Scanner interface.
 func (simapp *devStateToIbpiMap) Scan(state fmt.ScanState, verb rune) error {
-	smap, err := ScanMapHelper(state, verb)
+	smap := stringToStringMap{}
+	err := smap.Scan(state, verb)
 	if err != nil {
 		return err
 	}
