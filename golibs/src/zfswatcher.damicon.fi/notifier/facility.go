@@ -1,5 +1,5 @@
 //
-// favility.go
+// facility.go
 //
 // Copyright © 2012-2013 Damicon Kraa Oy
 //
