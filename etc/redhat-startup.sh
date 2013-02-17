@@ -65,15 +65,10 @@ case "$1" in
         fi
 	;;
     reload)
-        # If config can be reloaded without restarting, implement it here,
-        # remove the "exit", and add "reload" to the usage message below.
-        # For example:
-        # status $prog >/dev/null || exit 7
-        # killproc $prog -HUP
-        action $"Service ${0##*/} does not support the reload action: " /bin/false
-        exit 3
+        status $prog >/dev/null || exit 7
+        killproc $prog -HUP
         ;;
     *)
-        echo $"Usage: $0 {start|stop|status|restart|try-restart|force-reload}"
+        echo $"Usage: $0 {start|stop|status|restart|try-restart|reload|force-reload}"
         exit 2
 esac

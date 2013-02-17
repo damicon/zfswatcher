@@ -112,20 +112,12 @@ case "$1" in
   status)
        status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
        ;;
-  #reload|force-reload)
-	#
-	# If do_reload() is not implemented then leave this commented out
-	# and leave 'force-reload' as an alias for 'restart'.
-	#
-	#log_daemon_msg "Reloading $DESC" "$NAME"
-	#do_reload
-	#log_end_msg $?
-	#;;
-  restart|force-reload)
-	#
-	# If the "reload" option is implemented then remove the
-	# 'force-reload' alias
-	#
+  reload|force-reload)
+	log_daemon_msg "Reloading $DESC" "$NAME"
+	do_reload
+	log_end_msg $?
+	;;
+  restart)
 	log_daemon_msg "Restarting $DESC" "$NAME"
 	do_stop
 	case "$?" in
@@ -144,8 +136,7 @@ case "$1" in
 	esac
 	;;
   *)
-	#echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
-	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+	echo "Usage: $SCRIPTNAME {start|stop|status|restart|reload|force-reload}" >&2
 	exit 3
 	;;
 esac
