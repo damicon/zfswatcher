@@ -34,13 +34,13 @@ import (
 
 // Config file processing.
 
+// Default configuration file path.
 const CFGFILE = "/etc/zfs/zfswatcher.conf"
 
+// Global for configuration file.
 var cfgFile string
 
-type stateToSeverityMap map[string]notifier.Severity
-type stringToStringMap map[string]string
-
+// Holder for global configuration information. Filled in by "gcfg".
 type cfgType struct {
 	Main struct {
 		Zpoolstatusrefresh uint
@@ -110,10 +110,14 @@ type cfgType struct {
 	}
 }
 
+type stringToStringMap map[string]string
+type stateToSeverityMap map[string]notifier.Severity
+
+// Points to the global current configuration.
 var cfg *cfgType
 
 // Implement fmt.Scanner interface.
-func (ssmapp *stringToStringMap) Scan(state fmt.ScanState, verb rune) error {
+func (smapp *stringToStringMap) Scan(state fmt.ScanState, verb rune) error {
 	smap := make(stringToStringMap)
 	for {
 		tok, err := state.Token(true, nil)
@@ -130,11 +134,11 @@ func (ssmapp *stringToStringMap) Scan(state fmt.ScanState, verb rune) error {
 		}
 		smap[pair[0]] = pair[1]
 	}
-	*ssmapp = smap
+	*smapp = smap
 	return nil
 }
 
-// Implement fmt.Scanner interface on top of other fmt.Scanner interface.
+// Implement fmt.Scanner interface on top of two other fmt.Scanner interfaces.
 func (ssmapp *stateToSeverityMap) Scan(state fmt.ScanState, verb rune) error {
 	smap := stringToStringMap{}
 	err := smap.Scan(state, verb)
