@@ -1,7 +1,6 @@
 - configurable attachment
 - udev trigger led update?
 - configurable device read/write/cksum error thresholds
-- alert about pool space nearly full (with configurable thresholds)
 - persist state
 - web interface: remove unused javascripts
 - web interface: statistics

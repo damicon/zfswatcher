@@ -65,6 +65,7 @@ type cfgType struct {
 		Devcksumerrorsincreased  notifier.Severity
 		Devadditionalinfochanged notifier.Severity
 		Devadditionalinfocleared notifier.Severity
+		Usedspace		 percentageToSeverityMap
 	}
 	Leds struct {
 		Enable      bool
@@ -112,6 +113,7 @@ type cfgType struct {
 
 type stringToStringMap map[string]string
 type stateToSeverityMap map[string]notifier.Severity
+type percentageToSeverityMap map[int]notifier.Severity
 
 // Points to the global current configuration.
 var cfg *cfgType
@@ -164,6 +166,28 @@ func (ssmap stateToSeverityMap) getSeverity(str string) notifier.Severity {
 		sev = notifier.INFO
 	}
 	return sev
+}
+
+// Implement fmt.Scanner interface.
+func (psmapp *percentageToSeverityMap) Scan(state fmt.ScanState, verb rune) error {
+	ssmap := stateToSeverityMap{}
+	err := ssmap.Scan(state, verb)
+	if err != nil {
+		return err
+	}
+	psmap := make(percentageToSeverityMap)
+	for a, b := range ssmap {
+		if len(a) < 2 || a[len(a)-1] != '%' {
+			return errors.New(`invalid percentage entry "` + a + `"`)
+		}
+		var percentage int
+		if n, err := fmt.Sscan(a[:len(a)-1], &percentage); n != 1 {
+			return err
+		}
+		psmap[percentage] = b
+	}
+	*psmapp = psmap
+	return nil
 }
 
 // Check for and notify about configuration error.

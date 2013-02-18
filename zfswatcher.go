@@ -202,6 +202,31 @@ func checkZpoolStatus(os, ns []*PoolType) {
 	}
 }
 
+// Check ZFS space usage and send notifications if needed.
+func checkZfsUsage(oldusage, newusage map[string]*PoolUsageType) {
+	for pool := range oldusage {
+		if _, ok := newusage[pool]; !ok {
+			continue
+		}
+		ou := int(oldusage[pool].Used * 100 / oldusage[pool].Avail)
+		nu := int(newusage[pool].Used * 100 / newusage[pool].Avail)
+		if !(nu > ou) {
+			continue
+		}
+		maxlevel := 0
+		for level, _ := range cfg.Severity.Usedspace {
+			if ou < level && nu >= level && level > maxlevel {
+				maxlevel = level
+			}
+		}
+		if maxlevel != 0 {
+			notify.Printf(cfg.Severity.Usedspace[maxlevel],
+				`pool "%s" usage reached %d%%`,
+				pool, maxlevel)
+		}
+	}
+}
+
 // Set the initial state of the LEDs.
 func setupLeds(state []*PoolType) {
 	ledsToSet := make(map[string]ibpiID)
@@ -262,17 +287,26 @@ func main() {
 	notify.Print(notifier.INFO, "zfswatcher starting")
 
 	var statusTicker, zfslistTicker *time.Ticker
-	var state []*PoolType
 
 	// get the initial zpool status:
-	zpoolStatusOutput, err := getCommandOutput(cfg.Main.Zpoolstatuscmd)
+	out, err := getCommandOutput(cfg.Main.Zpoolstatuscmd)
 	if err != nil {
 		notify.Print(notifier.CRIT, "exiting, getting ZFS status failed")
 		goto EXIT
 	}
-	state, err = parseZpoolStatus(zpoolStatusOutput)
+	currentState.state, err = parseZpoolStatus(out)
 	if err != nil {
 		notify.Print(notifier.CRIT, "exiting, parsing ZFS status failed")
+		goto EXIT
+	}
+	out, err = getCommandOutput(cfg.Main.Zfslistcmd)
+	if err != nil {
+		notify.Print(notifier.CRIT, "exiting, getting ZFS disk usage failed")
+		goto EXIT
+	}
+	currentState.usage = parseZfsList(out)
+	if err != nil {
+		notify.Print(notifier.CRIT, "exiting, parsing ZFS disk usage failed")
 		goto EXIT
 	}
 
@@ -282,7 +316,7 @@ func main() {
 
 	// set initial led states
 	if cfg.Leds.Enable {
-		setupLeds(state)
+		setupLeds(currentState.state)
 	}
 
 	// start a web server goroutine:
@@ -311,10 +345,9 @@ MAINLOOP:
 				notify.Print(notifier.CRIT, "parsing ZFS status failed")
 				continue
 			}
-			checkZpoolStatus(state, newstate)
-			state = newstate
+			checkZpoolStatus(currentState.state, newstate)
 			currentState.mutex.Lock()
-			currentState.state = state
+			currentState.state = newstate
 			currentState.mutex.Unlock()
 		// get disk usage statistics:
 		case <-zfslistTicker.C:
@@ -323,14 +356,14 @@ MAINLOOP:
 				notify.Print(notifier.CRIT, "getting ZFS disk usage failed")
 				continue
 			}
-			usage := parseZfsList(zfsListOutput)
+			newusage := parseZfsList(zfsListOutput)
 			if err != nil {
 				notify.Print(notifier.CRIT, "parsing ZFS disk usage failed")
 				continue
 			}
-			// checkZfsUsage() // XXX
+			checkZfsUsage(currentState.usage, newusage)
 			currentState.mutex.Lock()
-			currentState.usage = usage
+			currentState.usage = newusage
 			currentState.mutex.Unlock()
 		// signals:
 		case <-sigCexit:
