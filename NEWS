@@ -4,11 +4,14 @@
 
 version 0.3 released 2013-02-20
 
+ - Warnings about disk space usage at configurable thresholds.
+
  - Experimental FreeBSD and OpenIndiana support.
 
  - Reconfigure on SIGHUP.
 
  - Ubuntu ZFS PPA dependency fix.
+
 
 version 0.2 released 2013-02-04
 
