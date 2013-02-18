@@ -65,7 +65,7 @@ type cfgType struct {
 		Devcksumerrorsincreased  notifier.Severity
 		Devadditionalinfochanged notifier.Severity
 		Devadditionalinfocleared notifier.Severity
-		Usedspace		 percentageToSeverityMap
+		Usedspace                percentageToSeverityMap
 	}
 	Leds struct {
 		Enable      bool
