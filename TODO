@@ -1,6 +1,4 @@
-- led control does not work with device aliases set in zdev.conf or vdev_id.conf
 - configurable attachment
-- reload config on SIGHUP
 - udev trigger led update?
 - configurable device read/write/cksum error thresholds
 - alert about pool space nearly full (with configurable thresholds)
