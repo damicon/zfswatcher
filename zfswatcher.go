@@ -204,6 +204,9 @@ func checkZpoolStatus(os, ns []*PoolType) {
 
 // Check ZFS space usage and send notifications if needed.
 func checkZfsUsage(oldusage, newusage map[string]*PoolUsageType) {
+	if len(cfg.Severity.Usedspace) == 0 {
+		return
+	}
 	for pool := range oldusage {
 		if _, ok := newusage[pool]; !ok {
 			continue
