@@ -154,22 +154,22 @@ func TestReadStringInto(t *testing.T) {
 			err := ReadStringInto(res, tt.gcfg)
 			if tt.ok {
 				if err != nil {
-					t.Errorf("%s failed; got error %v, wanted ok", id, err)
+					t.Errorf("%s fail: got error %v, wanted ok", id, err)
 					continue
 				} else if !reflect.DeepEqual(res, tt.exp) {
-					t.Errorf("%s failed; got value %#v, wanted value %#v", id, res, tt.exp)
+					t.Errorf("%s fail: got value %#v, wanted value %#v", id, res, tt.exp)
 					continue
 				}
 				if !testing.Short() {
-					t.Logf("%s passed; got value %#v", id, res)
+					t.Logf("%s pass: got value %#v", id, res)
 				}
 			} else { // !tt.ok
 				if err == nil {
-					t.Errorf("%s failed; got value %#v, wanted error", id, res)
+					t.Errorf("%s fail: got value %#v, wanted error", id, res)
 					continue
 				}
 				if !testing.Short() {
-					t.Logf("%s passed; got error %v", id, err)
+					t.Logf("%s pass: got error %v", id, err)
 				}
 			}
 		}

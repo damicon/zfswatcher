@@ -5,7 +5,7 @@
 // See ReadInto and the examples to get an idea of how to use it.
 //
 // This package is still a work in progress, and both the supported syntax and
-// the API is subject to change.
+// the API is subject to change. See below for planned changes.
 //
 // The syntax is based on that used by git config:
 // http://git-scm.com/docs/git-config#_syntax .
@@ -40,13 +40,14 @@
 //    - support multi-value variables
 //    - support multiple inputs (readers, strings, files)
 //    - support declaring encoding (?)
-//    - support automatic derefereining of pointer fields (?)
+//    - support automatic dereferencing of pointer fields (?)
 //    - support varying fields sets for subsections (?)
 //  - scanEnum
 //    - should use longest match (?)
 //    - support matching on unique prefix (?)
 //  - writing gcfg files
 //  - error handling
+//    - report position of extra characters in value
 //    - make error context accessible programmatically?
 //    - limit input size?
 //  - move TODOs to issue tracker (eventually)
