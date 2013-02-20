@@ -51,45 +51,50 @@ zfswatcher: zfswatcher.go leds.go setup.go util.go version.go webserver.go zpars
 
 clean: 
 	GOPATH=$(GOPATH) $(GO) clean
-	rm -f zfswatcher \
-		zfswatcher-$(VERSION).tar.gz \
-		zfswatcher-$(VERSION)-*.rpm \
-		zfswatcher_$(VERSION)-*.deb \
-		zfswatcher_$(VERSION)-*.changes
+	version=$(VERSION) &&						\
+	rm -f zfswatcher						\
+		zfswatcher-$${version}.tar.gz				\
+		zfswatcher-$${version}-*.rpm				\
+		zfswatcher_$${version}-*.deb				\
+		zfswatcher_$${version}-*.changes
 
 install: zfswatcher
-	install -d $(DESTDIR)$(sbindir) $(DESTDIR)$(sysconfdir)/zfs \
-		$(DESTDIR)$(datadir)/zfswatcher \
+	install -d $(DESTDIR)$(sbindir) $(DESTDIR)$(sysconfdir)/zfs	\
+		$(DESTDIR)$(datadir)/zfswatcher				\
 		$(DESTDIR)$(man8dir)
 	install -c zfswatcher $(DESTDIR)$(sbindir)/zfswatcher
-	test -e $(DESTDIR)$(sysconfdir)/zfs/zfswatcher.conf \
-		|| install -c -m 644 etc/zfswatcher.conf \
+	test -e $(DESTDIR)$(sysconfdir)/zfs/zfswatcher.conf		\
+		|| install -c -m 644 etc/zfswatcher.conf		\
 			$(DESTDIR)$(sysconfdir)/zfs/zfswatcher.conf
-	install -c -m 644 doc/zfswatcher.8 \
+	install -c -m 644 doc/zfswatcher.8				\
 		$(DESTDIR)$(man8dir)/zfswatcher.8
 	cp -R www $(DESTDIR)$(datadir)/zfswatcher/www
 
 # Make tarball:
 dist:
-	git archive --prefix=zfswatcher-$(VERSION)/ \
-		-o zfswatcher-$(VERSION).tar.gz $(VERSION)
+	version=$(VERSION) &&						\
+	git archive --prefix=zfswatcher-$${version}/			\
+		-o zfswatcher-$${version}.tar.gz $${version}
 
 # Make a new Debian package version:
 newdebversion:
-	dch --newversion $(VERSION)-1					\
+	version=$(VERSION) &&						\
+	dch --newversion $${version}-1					\
 		--upstream						\
 		--distribution unstable 				\
-		"New version $(VERSION)"
+		"New version $${version}"
 
 # Make Debian package:
 deb:
+	version=$(VERSION) &&						\
 	dpkg-buildpackage -b -uc -tc &&					\
-	mv ../zfswatcher_$(VERSION)-*.deb 				\
-		../zfswatcher_$(VERSION)-*.changes 			\
+	mv ../zfswatcher_$${version}-*.deb 				\
+		../zfswatcher_$${version}-*.changes 			\
 		.
 
 # Make RPM package:
 rpm:	dist
+	version=$(VERSION) &&						\
 	rpmbuild=`mktemp -d "/tmp/zfswatcher-rpmbuild-XXXXXXXX"`;	\
 	mkdir -p $$rpmbuild/TMP &&					\
 	mkdir -p $$rpmbuild/BUILD &&					\
@@ -98,11 +103,11 @@ rpm:	dist
 	mkdir -p $$rpmbuild/SPECS &&					\
 	cp zfswatcher.spec $$rpmbuild/SPECS/ &&				\
 	mkdir -p $$rpmbuild/SOURCES &&					\
-	cp zfswatcher-$(VERSION).tar.gz $$rpmbuild/SOURCES/ &&		\
+	cp zfswatcher-$${version}.tar.gz $$rpmbuild/SOURCES/ &&		\
 	rpmbuild -ba							\
 		--define "_topdir $$rpmbuild"				\
 		--define "_tmppath $$rpmbuild/TMP"			\
-		--define "version $(VERSION)"				\
+		--define "version $${version}"				\
 		zfswatcher.spec &&					\
 	cp $$rpmbuild/RPMS/*/* . &&					\
 	cp $$rpmbuild/SRPMS/* . &&					\
