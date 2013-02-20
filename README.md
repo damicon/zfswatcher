@@ -51,7 +51,7 @@ Installing and upgrading on Debian/Ubuntu
 
 Download the .deb package and install it with `dpkg`, for example:
 
-    dpkg -i zfswatcher_0.02-1_amd64.deb
+    dpkg -i zfswatcher_0.03-1_amd64.deb
 
 The service is started by default according to the Debian and Ubuntu
 conventions.
@@ -62,7 +62,7 @@ Installing and upgrading on RHEL/CentOS/Scientific Linux
 
 Download the .rpm package and install it with `yum`, for example:
 
-    yum install zfswatcher-0.02-1.x86_64.rpm
+    yum install zfswatcher-0.03-1.x86_64.rpm
 
 The service is **not** started by default according to Red Hat
 conventions. It can be started as follows:
@@ -92,9 +92,8 @@ The version 1.0.3 of the Go programming language on a 64 bit platform
 is recommended.
 
 The software has been developed on Debian 6.0 (squeeze) and Ubuntu 12.04
-(precise) but it should work fine on other Linux distributions.
-
-Minor modifications are currently required if running on other platforms.
+(precise) but it should work fine on other Linux distributions and also
+recent FreeBSD versions.
 
 
 ### Compiling
