@@ -19,6 +19,13 @@
 // along with zfswatcher. If not, see <http://www.gnu.org/licenses/>.
 //
 
+/*
+  zfswatcher - ZFS pool monitoring and notification daemon
+
+  Please see the web site for more information:
+
+  http://zfswatcher.damicon.fi/
+*/
 package main
 
 import (
