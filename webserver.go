@@ -24,13 +24,13 @@ package main
 import (
 	"fmt"
 	auth "github.com/abbot/go-http-auth"
+	"github.com/damicon/zfswatcher/notifier"
 	"html/template"
 	"math/rand"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
-	"zfswatcher.damicon.fi/notifier"
 )
 
 var templates *template.Template

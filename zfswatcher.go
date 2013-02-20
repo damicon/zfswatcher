@@ -23,13 +23,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/damicon/zfswatcher/notifier"
 	"os"
 	"os/signal"
 	"runtime"
 	"sync"
 	"syscall"
 	"time"
-	"zfswatcher.damicon.fi/notifier"
 )
 
 // Other global variables.

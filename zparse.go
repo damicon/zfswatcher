@@ -23,9 +23,9 @@ package main
 
 import (
 	"errors"
+	"github.com/damicon/zfswatcher/notifier"
 	"runtime"
 	"strings"
-	"zfswatcher.damicon.fi/notifier"
 )
 
 // ZFS pool disk usage.

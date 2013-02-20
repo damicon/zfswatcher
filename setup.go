@@ -25,11 +25,11 @@ import (
 	"code.google.com/p/gcfg"
 	"errors"
 	"fmt"
+	"github.com/damicon/zfswatcher/notifier"
 	"github.com/ogier/pflag"
 	"os"
 	"strings"
 	"time"
-	"zfswatcher.damicon.fi/notifier"
 )
 
 // Config file processing.

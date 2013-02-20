@@ -24,6 +24,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/damicon/zfswatcher/notifier"
 	"os"
 	"os/exec"
 	"regexp"
@@ -31,7 +32,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"zfswatcher.damicon.fi/notifier"
 )
 
 // Run external command and capture output.
