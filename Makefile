@@ -19,9 +19,6 @@
 # along with zfswatcher. If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Change this before releasing new version:
-VERSION	= 0.03
-
 # Shell:
 SHELL	= /bin/sh
 
@@ -43,20 +40,17 @@ man1dir		= $(mandir)/man1
 man5dir		= $(mandir)/man5
 man8dir		= $(mandir)/man8
 
+VERSION		= `fgrep VERSION version.go | cut -d\" -f2`
+
 # Rules:
 all: zfswatcher
-
-version.go:
-	(echo "package main" ; \
-	echo "" ; \
-	echo "const VERSION = \"$(VERSION)\"") > version.go
 
 zfswatcher: zfswatcher.go leds.go util.go webserver.go version.go osutil_linux.go osutil_freebsd.go
 	GOPATH=$(GOPATH) $(GO) build -o $@
 
 clean: 
 	GOPATH=$(GOPATH) $(GO) clean
-	rm -f zfswatcher version.go \
+	rm -f zfswatcher \
 		zfswatcher-$(VERSION).tar.gz \
 		zfswatcher-$(VERSION)-*.rpm \
 		zfswatcher_$(VERSION)-*.deb \
