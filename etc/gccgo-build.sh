@@ -27,8 +27,6 @@ compile_go_package () {
 	subpackages="$subpackages $INC/$module.o"
 }
 
-make version.go
-
 compile_go_package code.google.com/p/gcfg/token \
 	token.go position.go serialize.go
 compile_go_package code.google.com/p/gcfg/scanner \
@@ -41,14 +39,13 @@ compile_go_package github.com/ogier/pflag \
 	flag.go
 compile_go_package github.com/snabb/smtp \
 	smtp.go auth.go
-compile_go_package zfswatcher.damicon.fi/notifier \
+compile_go_package github.com/damicon/zfswatcher/notifier \
 	notifier.go facility.go severity.go msg.go logger_*.go
 
 set -x
 $GCCGO -I $INC -o zfswatcher \
 	zfswatcher.go leds.go util.go version.go webserver.go \
-	setup.go zparse.go \
-	osutil_$GOOS.go \
+	setup.go zparse.go osutil_$GOOS.go \
 	$subpackages
 
 # eof
