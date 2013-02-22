@@ -80,10 +80,11 @@ Then run:
 Installing from source on Solaris/OpenSolaris/Openillumos
 ---------------------------------------------------------
 
-The normal "gc" Go toolchain is not available on this plaform. Compiling
-a recent version of [gccgo](http://golang.org/doc/install/gccgo) from
-svn://gcc.gnu.org/svn/gcc/branches/gccgo is required. After that you
-can utilize the `etc/gccgo-build.sh` shell script.
+The normal "gc" Go toolchain is not available on this plaform.
+You need to compile a recent version of
+[gccgo](http://golang.org/doc/install/gccgo) from the Subversion
+repository at `svn://gcc.gnu.org/svn/gcc/branches/gccgo`. After that
+you can utilize the `etc/gccgo-build.sh` shell script.
 
 Good luck!
 
