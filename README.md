@@ -3,41 +3,9 @@ zfswatcher
 
 ZFS pool monitoring and notification daemon.
 
-Features
---------
-
-- Periodically gets the zpool status output and parses it.
-
-- Sends configurable notifications on status changes.
-
-- Supports the following notification destinations with configurable
-  severity levels:
-  * file
-  * syslog
-  * e-mail
-
-- Controls the disk enclosure LEDs (currently using external ledctl
-  utility).
-
-- Web interface for viewing status and displaying logs.
-
-- Disk "locate" LEDs can be controlled through web interface.
-
-
-Supported operating systems/distributions
------------------------------------------
-
-Linux on x86_64/amd64 platform. In particular the following distributions:
-
-- Debian 6.0 (squeeze)
-- Ubuntu 12.04 (precise)
-- Ubuntu 12.10 (quantal)
-- RHEL/CentOS/Scientific Linux 6.X
-
-Obtaining the software
-----------------------
-
-Downloads and other information:
+Please see the project web site for general information about features,
+supported operating environments and to download a tarball or packaged
+version of this software:
 
 http://zfswatcher.damicon.fi/
 
@@ -70,8 +38,8 @@ conventions. It can be started as follows:
     service zfswatcher start
 
 
-Installing from source
-----------------------
+Installing from source on Linux and FreeBSD
+-------------------------------------------
 
 Generally it is best to use the ready made packages on Debian/Ubuntu
 and RHEL/CentOS/Scientific Linux.
@@ -107,6 +75,17 @@ Then run:
 ### Installation
 
     make install
+
+
+Installing from source on Solaris/OpenSolaris/Openillumos
+---------------------------------------------------------
+
+The normal "gc" Go toolchain is not available on this plaform. Compiling
+a recent version of [gccgo](http://golang.org/doc/install/gccgo) from
+svn://gcc.gnu.org/svn/gcc/branches/gccgo is required. After that you
+can utilize the `etc/gccgo-build.sh` shell script.
+
+Good luck!
 
 
 Configuration
