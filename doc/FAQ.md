@@ -10,11 +10,12 @@ to release their improvements as open source.
 
 ### Why parsing ZFS command output instead of linking to ZFS libraries?
 
-This approach makes it also simple to distribute binary packages which
-are not bound to a specific version of ZoL.
+This approach makes it simple to distribute binary packages which are not
+bound to a specific version of ZoL. If we link to the libraries, we would
+have to make binary packages which depend on specific version of ZoL.
 
-ZFS on Linux developers do not recommend linking to the ZFS libraries.
-See the following discussion thread:
+Also ZFS on Linux developers do not recommend linking to the ZFS
+libraries. See the following discussion thread:
 
 https://groups.google.com/a/zfsonlinux.org/d/topic/zfs-devel/AiEi96Kde-k/discussion
 
