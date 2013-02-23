@@ -77,7 +77,7 @@ Then run:
     make install
 
 
-Installing from source on Solaris/OpenSolaris/Openillumos
+Installing from source on Solaris/OpenSolaris/OpenIndiana
 ---------------------------------------------------------
 
 The normal "gc" Go toolchain is not available on this plaform.
