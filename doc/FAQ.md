@@ -5,7 +5,8 @@ zfswatcher frequently asked questions
 
 Because we want to keep this project and any improvements open
 sourced. This way anyone who chooses to build on this software will have
-to release their improvements as open source.
+to release their improvements as under the same license. GPLv3 addresses
+some loopholes which are present in GPLv2.
 
 
 ### Why parsing ZFS command output instead of linking to ZFS libraries?
