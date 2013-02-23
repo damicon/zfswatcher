@@ -21,3 +21,8 @@ https://groups.google.com/a/zfsonlinux.org/d/topic/zfs-devel/AiEi96Kde-k/discuss
 
 This way we can also ignore any license incompatibility issues.
 
+
+### Why is the software implemented in Go instead of <other programming language>?
+
+Because Go is cooler than <other programming language>.
+
