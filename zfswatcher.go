@@ -49,6 +49,10 @@ var currentState struct {
 	usage map[string]*PoolUsageType
 	mutex sync.RWMutex
 }
+var iostat struct {
+	process *BackgroundProcess
+	ch      chan *zpoolIostatEntry
+}
 
 var startTime time.Time
 
@@ -329,6 +333,23 @@ func main() {
 		setupLeds(currentState.state)
 	}
 
+	// start iostat goroutine:
+	if cfg.Main.Zpooliostatcmd != "" {
+		iostat.process, err = NewBackgroundProcess(cfg.Main.Zpooliostatcmd)
+		if err != nil {
+			notify.Print(notifier.ERR, "failed to start iostat command")
+		} else {
+			iostat.ch = make(chan *zpoolIostatEntry)
+			go zpoolIostatStreamReader(iostat.ch, iostat.process.Out)
+			// for now just print the output to stdout: XXX
+			go func() {
+				for i := range iostat.ch {
+					fmt.Printf("iostat output: %s\n", i.str)
+				}
+			}()
+		}
+	}
+
 	// start a web server goroutine:
 	if cfg.Www.Enable {
 		go webServer()
@@ -394,6 +415,10 @@ MAINLOOP:
 	zfslistTicker.Stop()
 EXIT:
 	notify.Print(notifier.INFO, "zfswatcher stopping")
+
+	if iostat.process != nil {
+		iostat.process.Stop()
+	}
 
 	// XXX persist data?
 

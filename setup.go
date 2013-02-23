@@ -48,6 +48,7 @@ type cfgType struct {
 		Zfslistrefresh     uint
 		Zfslistcmd         string
 		Zfslistusagecmd    string
+		Zpooliostatcmd     string
 		Pidfile            string
 	}
 	Severity struct {

@@ -24,6 +24,7 @@ package main
 import (
 	"errors"
 	"github.com/damicon/zfswatcher/notifier"
+	"io"
 	"runtime"
 	"strings"
 )
@@ -280,6 +281,35 @@ func parseZpoolStatus(zpoolStatusOutput string) (pools []*PoolType, err error) {
 		}
 	}
 	return pools, nil
+}
+
+type zpoolIostatEntry struct {
+	str string
+}
+
+func zpoolIostatStreamReader(ch chan *zpoolIostatEntry, r io.Reader) {
+	buf := make([]byte, 1024)
+
+	for {
+		n, err := r.Read(buf)
+		if n > 0 {
+			// XXX parse here
+			ch <- &zpoolIostatEntry{
+				str: string(buf[:n]),
+			}
+		}
+		if err != nil && err != io.EOF {
+			// unexpected error
+			ch <- &zpoolIostatEntry{
+				str: "error: " + err.Error(),
+			}
+		}
+		if err != nil || n == 0 {
+			// end of input or error
+			close(ch)
+			return
+		}
+	}
 }
 
 // eof
