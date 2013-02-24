@@ -283,26 +283,131 @@ func parseZpoolStatus(zpoolStatusOutput string) (pools []*PoolType, err error) {
 	return pools, nil
 }
 
-type zpoolIostatEntry struct {
-	str string
+/*
+                             capacity     operations    bandwidth
+pool                      alloc   free   read  write   read  write
+------------------------  -----  -----  -----  -----  -----  -----
+tank                      1.72T  8.03T     18     72   303K  6.43M
+  raidz2                   586G  2.68T      7     24   102K  2.14M
+    sdi                       -      -      2      7  16.8K   550K
+    sdj                       -      -      0      7  14.8K   550K
+  raidz2                   586G  2.68T      3     24  98.2K  2.15M
+    sdk                       -      -      0      7  23.2K   550K
+    sdv                       -      -      0      7  13.0K   550K
+logs                          -      -      -      -      -      -
+  sdc                       84K  7.37G      0      0     12      3
+cache                         -      -      -      -      -      -
+  sdx                     31.3G  87.9G      0      2  2.21K   282K
+  sdy                     31.2G  88.0G      0      2  2.35K   281K
+  sdz                     31.3G  87.9G      0      2  2.40K   282K
+  sdd                     31.5G  87.7G      0      2  2.14K   284K
+------------------------  -----  -----  -----  -----  -----  -----
+vmstore                   17.5G  50.5G      0      0     14      1
+  scsi-3500000e0158fea80  17.5G  50.5G      0      0     14      1
+------------------------  -----  -----  -----  -----  -----  -----
+*/
+
+type ZpoolIostatRow struct {
+	Dev            string
+	CapacityAlloc   int64
+	CapacityFree    int64
+	OperationsRead  int64
+	OperationsWrite int64
+	BandwidthRead   int64
+	BandwidthWrite  int64
 }
 
-func zpoolIostatStreamReader(ch chan *zpoolIostatEntry, r io.Reader) {
-	buf := make([]byte, 1024)
+type ZpoolIostatEntry map[string]*ZpoolIostatRow
+type ZpoolIostatTable map[string]ZpoolIostatEntry
+
+func zpoolIostatParseRow(str string) *ZpoolIostatRow {
+	f := strings.Fields(str)
+
+	if len(f) != 7 {
+		return nil
+	}
+
+	return &ZpoolIostatRow{
+		Dev:            f[0],
+		CapacityAlloc:   unniceNumber(f[1]),
+		CapacityFree:    unniceNumber(f[2]),
+		OperationsRead:  unniceNumber(f[3]),
+		OperationsWrite: unniceNumber(f[4]),
+		BandwidthRead:   unniceNumber(f[5]),
+		BandwidthWrite:  unniceNumber(f[6]),
+	}
+}
+
+type zpoolIostatParserState int
+
+const (
+	ioSTART zpoolIostatParserState = iota
+	ioPOOL
+	ioDEV
+)
+
+func ZpoolIostatParser(str string) *ZpoolIostatTable {
+	table := make(ZpoolIostatTable)
+	var currpool string
+
+	st := ioSTART
+	for _, row := range strings.Split(str, "\n") {
+		if row == "" {
+			break
+		}
+		switch st {
+		case ioSTART:
+			// just wait for first separator
+			if len(row) > 1 && row[0:1] == "-" {
+				st = ioPOOL
+			}
+		case ioPOOL:
+			if len(row) > 1 && row[0:1] == "-" {
+				st = ioPOOL
+				continue
+			}
+			// first row has the pool name
+			f := zpoolIostatParseRow(row)
+			if f == nil {
+				return nil // error
+			}
+			currpool = f.Dev
+			table[currpool] = make(ZpoolIostatEntry)
+			table[currpool][currpool] = f
+			st = ioDEV
+		case ioDEV:
+			if len(row) > 1 && row[0:1] == "-" {
+				st = ioPOOL
+				continue
+			}
+			// other device rows
+			f := zpoolIostatParseRow(row)
+			if f == nil {
+				return nil // error
+			}
+			table[currpool][f.Dev] = f
+		}
+	}
+	return &table
+}
+
+func ZpoolIostatStreamReader(ch chan *ZpoolIostatTable, r io.Reader) {
+	readbuf := make([]byte, 4096)
+	var collectbuf string
 
 	for {
-		n, err := r.Read(buf)
+		n, err := r.Read(readbuf)
 		if n > 0 {
-			// XXX parse here
-			ch <- &zpoolIostatEntry{
-				str: string(buf[:n]),
+			collectbuf = collectbuf + string(readbuf[:n])
+			// two consecutive newlines (an empty line) separates two iostat entries:
+			if pos := strings.Index(collectbuf, "\n\n"); pos != -1 {
+				ch <- ZpoolIostatParser(collectbuf[:pos+1]) // include 1 newline
+				collectbuf = collectbuf[pos+2:]             // skip both newlines
 			}
 		}
 		if err != nil && err != io.EOF {
 			// unexpected error
-			ch <- &zpoolIostatEntry{
-				str: "error: " + err.Error(),
-			}
+			ch <- nil
 		}
 		if err != nil || n == 0 {
 			// end of input or error

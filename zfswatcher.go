@@ -51,7 +51,7 @@ var currentState struct {
 }
 var iostat struct {
 	process *BackgroundProcess
-	ch      chan *zpoolIostatEntry
+	ch      chan *ZpoolIostatTable
 }
 
 var startTime time.Time
@@ -339,12 +339,12 @@ func main() {
 		if err != nil {
 			notify.Print(notifier.ERR, "failed to start iostat command")
 		} else {
-			iostat.ch = make(chan *zpoolIostatEntry)
-			go zpoolIostatStreamReader(iostat.ch, iostat.process.Out)
+			iostat.ch = make(chan *ZpoolIostatTable)
+			go ZpoolIostatStreamReader(iostat.ch, iostat.process.Out)
 			// for now just print the output to stdout: XXX
 			go func() {
 				for i := range iostat.ch {
-					fmt.Printf("iostat output: %s\n", i.str)
+					fmt.Printf("iostat output: %+v\n", *i)
 				}
 			}()
 		}
