@@ -77,6 +77,15 @@ Then run:
     make install
 
 
+### Running
+
+There are some OS/distribution specific startup scripts in "etc"
+subdirectory. They may be useful.
+
+See the installed zfswatcher(8) manual page for information on invoking
+the zfswatcher process.
+
+
 Installing from source on Solaris/OpenSolaris/OpenIndiana
 ---------------------------------------------------------
 
