@@ -141,7 +141,6 @@ func (s *Scanner) scanComment() string {
 	// initial [;#] already consumed
 	offs := s.offset - 1 // position of initial [;#]
 
-	s.next()
 	for s.ch != '\n' && s.ch >= 0 {
 		s.next()
 	}

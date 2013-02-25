@@ -1,6 +1,7 @@
 package gcfg
 
 import (
+	"fmt"
 	"math/big"
 	"strings"
 	"testing"
@@ -44,5 +45,19 @@ func TestIssue1(t *testing.T) {
 		default:
 			t.Logf("%d pass: %v", i, err)
 		}
+	}
+}
+
+type confIssue2 struct{ Main struct{ Foo string } }
+
+var testsIssue2 = []readtest{
+	{"[main]\n;\nfoo = bar\n", &confIssue2{struct{ Foo string }{"bar"}}, true},
+	{"[main]\r\n;\r\nfoo = bar\r\n", &confIssue2{struct{ Foo string }{"bar"}}, true},
+}
+
+func TestIssue2(t *testing.T) {
+	for i, tt := range testsIssue2 {
+		id := fmt.Sprintf("issue2:%d", i)
+		testRead(t, id, tt)
 	}
 }

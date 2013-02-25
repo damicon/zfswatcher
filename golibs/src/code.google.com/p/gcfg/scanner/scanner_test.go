@@ -57,6 +57,7 @@ var tokens = [...]elt{
 	{token.IDENT, "foo६४", literal, "", ""},
 	{token.IDENT, "bar９８７６", literal, "", ""},
 	{token.IDENT, "foo-bar", literal, "", ""},
+	{token.IDENT, "foo", literal, ";\n", ""},
 	// String literals (subsection names)
 	{token.STRING, `"foobar"`, literal, "", ""},
 	{token.STRING, `"\""`, literal, "", ""},
@@ -158,11 +159,17 @@ func TestScan(t *testing.T) {
 			epos.Line = src_linecount
 			epos.Column = 2
 		}
-		if strings.ContainsRune(e.pre, '=') {
+		if e.pre != "" && strings.ContainsRune("=;#", rune(e.pre[0])) {
 			epos.Column = 1
 			checkPos(t, lit, pos, epos)
-			if tok != token.ASSIGN {
-				t.Errorf("bad token for %q: got %s, expected %s", lit, tok, token.ASSIGN)
+			var etok token.Token
+			if e.pre[0] == '=' {
+				etok = token.ASSIGN
+			} else {
+				etok = token.COMMENT
+			}
+			if tok != etok {
+				t.Errorf("bad token for %q: got %q, expected %q", lit, tok, etok)
 			}
 			pos, tok, lit = s.Scan()
 		}
@@ -170,9 +177,21 @@ func TestScan(t *testing.T) {
 		if tok != token.EOF {
 			epos.Column = 1 + len(e.pre)
 		}
+		if e.pre != "" && e.pre[len(e.pre)-1] == '\n' {
+			epos.Offset--
+			epos.Column--
+			checkPos(t, lit, pos, epos)
+			if tok != token.EOL {
+				t.Errorf("bad token for %q: got %q, expected %q", lit, tok, token.EOL)
+			}
+			epos.Line++
+			epos.Offset++
+			epos.Column = 1
+			pos, tok, lit = s.Scan()
+		}
 		checkPos(t, lit, pos, epos)
 		if tok != e.tok {
-			t.Errorf("bad token for %q: got %s, expected %s", lit, tok, e.tok)
+			t.Errorf("bad token for %q: got %q, expected %q", lit, tok, e.tok)
 		}
 		if e.tok.IsLiteral() {
 			// no CRs in value string literals
@@ -197,19 +216,19 @@ func TestScan(t *testing.T) {
 		if e.suf == "value" {
 			pos, tok, lit = s.Scan()
 			if tok != token.STRING {
-				t.Errorf("bad token for %q: got %s, expected %s", lit, tok, token.STRING)
+				t.Errorf("bad token for %q: got %q, expected %q", lit, tok, token.STRING)
 			}
 		} else if strings.ContainsRune(e.suf, ';') || strings.ContainsRune(e.suf, '#') {
 			pos, tok, lit = s.Scan()
 			if tok != token.COMMENT {
-				t.Errorf("bad token for %q: got %s, expected %s", lit, tok, token.COMMENT)
+				t.Errorf("bad token for %q: got %q, expected %q", lit, tok, token.COMMENT)
 			}
 		}
 		// skip EOLs
 		for i := 0; i < whitespace_linecount+newlineCount(e.suf); i++ {
 			pos, tok, lit = s.Scan()
 			if tok != token.EOL {
-				t.Errorf("bad token for %q: got %s, expected %s", lit, tok, token.EOL)
+				t.Errorf("bad token for %q: got %q, expected %q", lit, tok, token.EOL)
 			}
 		}
 	}
