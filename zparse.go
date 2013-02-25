@@ -308,7 +308,7 @@ vmstore                   17.5G  50.5G      0      0     14      1
 */
 
 type ZpoolIostatRow struct {
-	Dev            string
+	Dev             string
 	CapacityAlloc   int64
 	CapacityFree    int64
 	OperationsRead  int64
@@ -328,7 +328,7 @@ func zpoolIostatParseRow(str string) *ZpoolIostatRow {
 	}
 
 	return &ZpoolIostatRow{
-		Dev:            f[0],
+		Dev:             f[0],
 		CapacityAlloc:   unniceNumber(f[1]),
 		CapacityFree:    unniceNumber(f[2]),
 		OperationsRead:  unniceNumber(f[3]),

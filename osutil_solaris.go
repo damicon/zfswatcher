@@ -36,7 +36,7 @@ func getSystemUptime() (uptime time.Duration, err error) {
 // Returns system load averages.
 func getSystemLoadaverage() ([3]float32, error) {
 	// XXX
-        return [3]float32{0, 0, 0}, nil
+	return [3]float32{0, 0, 0}, nil
 }
 
 // Device lookup paths. (This list comes from lib/libzfs/libzfs_import.c)

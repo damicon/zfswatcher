@@ -228,7 +228,7 @@ func checkZfsUsage(oldusage, newusage map[string]*PoolUsageType) {
 			continue
 		}
 		maxlevel := 0
-		for level, _ := range cfg.Severity.Usedspace {
+		for level := range cfg.Severity.Usedspace {
 			if ou < level && nu >= level && level > maxlevel {
 				maxlevel = level
 			}

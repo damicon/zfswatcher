@@ -52,8 +52,7 @@ func getSystemLoadaverage() ([3]float32, error) {
 	if n == -1 {
 		return [3]float32{0, 0, 0}, errors.New("load average unavailable")
 	}
-        return [3]float32{float32(avg[0]), float32(avg[1]), float32(avg[2])}, nil
-
+	return [3]float32{float32(avg[0]), float32(avg[1]), float32(avg[2])}, nil
 }
 
 // Device lookup paths. (This list comes from lib/libzfs/libzfs_import.c)

@@ -35,8 +35,8 @@ const chan_SIZE = 32
 
 // Define the date/time format for outputs.
 const (
-	time_FORMAT = "15:04:05"
-	date_FORMAT = "2006-01-02"
+	time_FORMAT      = "15:04:05"
+	date_FORMAT      = "2006-01-02"
 	date_time_FORMAT = "2006-01-02 15:04:05"
 )
 
