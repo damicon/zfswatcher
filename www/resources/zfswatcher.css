@@ -1,0 +1,9 @@
+.table-zfswatcher-dashboard th,
+.table-zfswatcher-dashboard td {
+  vertical-align:middle;
+}
+
+.progress-zfswatcher-dashboard {
+  margin-bottom: 0px;
+  min-width: 50px;
+}
