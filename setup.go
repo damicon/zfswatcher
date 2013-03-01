@@ -179,7 +179,7 @@ func (psmapp *percentageToSeverityMap) Scan(state fmt.ScanState, verb rune) erro
 	}
 	psmap := make(percentageToSeverityMap)
 	for a, b := range ssmap {
-		if len(a) < 2 || a[len(a)-1] != '%' {
+		if len(a) < 2 || a[len(a)-1] != '%' || a[0] == '-' {
 			return errors.New(`invalid percentage entry "` + a + `"`)
 		}
 		var percentage int
