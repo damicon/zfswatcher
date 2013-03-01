@@ -105,6 +105,7 @@ type cfgType struct {
 		Severitycssclassmap  severityToWwwClassMap
 		Poolstatecssclassmap stringToStringMap
 		Devstatecssclassmap  stringToStringMap
+		Usedstatecssclassmap severityToWwwClassMap
 	}
 	Wwwuser map[string]*struct {
 		Enable   bool

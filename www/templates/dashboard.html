@@ -7,7 +7,7 @@
 		<dt>zfswatcher uptime:</dt><dd>{{ .ZfswatcherUptime }}</dd>
 	</dl>
 	{{ if .Pools }}
-	<table class="table table-hover">
+	<table class="table table-zfswatcher-dashboard table-hover">
 		<thead>
 			<tr>
 				<th style="width: 10%">Pool</th>
@@ -33,10 +33,10 @@
 				<td style="text-align: right">{{ .AvailPercent }}</td>
 				<td style="padding-left: 2em">
 					<a href="/usage/{{ .Name }}">
-					<div class="progress">
+					<div class="progress progress-zfswatcher-dashboard">
 					{{ if .UsedPercent }}
-						<div class="bar bar-warning" style="width: {{ .UsedPercent }}"></div>
-						<div class="bar bar-success" style="width: {{ .AvailPercent }}"></div>
+						<div class="bar {{ .UsedClass }}" style="width: {{ .UsedPercent }}"></div>
+						<div class="bar	bar-success" style="width: {{ .AvailPercent }}"></div>
 					{{ end }}
 					</div>
 					</a>
