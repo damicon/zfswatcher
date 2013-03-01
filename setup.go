@@ -40,6 +40,9 @@ const CFGFILE = "/etc/zfs/zfswatcher.conf"
 // Global for configuration file.
 var cfgFile string
 
+// Points to the global current configuration.
+var cfg *cfgType
+
 // Holder for global configuration information. Filled in by "gcfg".
 type cfgType struct {
 	Main struct {
@@ -114,11 +117,6 @@ type cfgType struct {
 }
 
 type stringToStringMap map[string]string
-type stateToSeverityMap map[string]notifier.Severity
-type percentageToSeverityMap map[int]notifier.Severity
-
-// Points to the global current configuration.
-var cfg *cfgType
 
 // Implement fmt.Scanner interface.
 func (smapp *stringToStringMap) Scan(state fmt.ScanState, verb rune) error {
@@ -141,6 +139,8 @@ func (smapp *stringToStringMap) Scan(state fmt.ScanState, verb rune) error {
 	*smapp = smap
 	return nil
 }
+
+type stateToSeverityMap map[string]notifier.Severity
 
 // Implement fmt.Scanner interface on top of two other fmt.Scanner interfaces.
 func (ssmapp *stateToSeverityMap) Scan(state fmt.ScanState, verb rune) error {
@@ -169,6 +169,8 @@ func (ssmap stateToSeverityMap) getSeverity(str string) notifier.Severity {
 	}
 	return sev
 }
+
+type percentageToSeverityMap map[int]notifier.Severity
 
 // Implement fmt.Scanner interface.
 func (psmapp *percentageToSeverityMap) Scan(state fmt.ScanState, verb rune) error {
