@@ -406,7 +406,7 @@ func ZpoolIostatStreamReader(ch chan *ZpoolIostatTable, r io.Reader) {
 			}
 		}
 		if err != nil && err != io.EOF {
-			// unexpected error
+			// unexpected error XXX
 			ch <- nil
 		}
 		if err != nil || n == 0 {
