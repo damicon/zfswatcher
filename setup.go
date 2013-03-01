@@ -194,6 +194,22 @@ func (psmapp *percentageToSeverityMap) Scan(state fmt.ScanState, verb rune) erro
 	return nil
 }
 
+// Get severity level based on used percentage level. 
+// Returns notifier.SEVERITY_NONE and ok = false if the percentage
+// does not reach any listed level.
+func (psmapp *percentageToSeverityMap) GetByPercentage(used int) (severity notifier.Severity, ok bool) {
+	maxlevel := -1
+	for level := range *psmapp {
+		if used >= level && level > maxlevel {
+			maxlevel = level
+		}
+	}
+	if maxlevel != -1 {
+		return (*psmapp)[maxlevel], true
+	}
+	return notifier.SEVERITY_NONE, false
+}
+
 // Check for and notify about configuration error.
 func checkCfgErr(cfgfile, sect, prof, param string, err error, errorSeen *bool) {
 	if err == nil {

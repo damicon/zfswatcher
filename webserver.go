@@ -101,10 +101,10 @@ type poolStatusWeb struct {
 	Devs         []devStatusWeb
 	Errors       string
 	Used         int64
-	UsedPercent  string
+	UsedPercent  int
 	UsedClass    string
 	Avail        int64
-	AvailPercent string
+	AvailPercent int
 	Total        int64
 }
 
@@ -174,16 +174,13 @@ func makePoolStatusWeb(pool *PoolType, usage map[string]*PoolUsageType) *poolSta
 	statusWeb.Total = -1
 	if u, ok := usage[pool.name]; ok {
 		statusWeb.Avail = u.Avail
-		statusWeb.AvailPercent = fmt.Sprintf("%.0f%%", float64(u.Avail*100)/float64(u.Avail+u.Used))
+		statusWeb.AvailPercent = u.GetAvailPercent()
 		statusWeb.Used = u.Used
-		usedPercent := float64(u.Used*100) / float64(u.Avail+u.Used)
-		statusWeb.UsedPercent = fmt.Sprintf("%.0f%%", usedPercent)
+		usedPercent := u.GetUsedPercent()
+		statusWeb.UsedPercent = usedPercent
 		statusWeb.Total = u.Avail + u.Used
-		if len(cfg.Severity.Usedspace) == 0 {
-			statusWeb.UsedClass = cfg.Www.Usedstatecssclassmap[notifier.INFO]
-		} else {
-			statusWeb.UsedClass = cfg.Www.Usedstatecssclassmap[severityFromUsedSpace(cfg.Severity.Usedspace, int(usedPercent))]
-		}
+		usedSeverity, _ := cfg.Severity.Usedspace.GetByPercentage(usedPercent)
+		statusWeb.UsedClass = cfg.Www.Usedstatecssclassmap[usedSeverity]
 	}
 
 	for n, dev := range pool.devs {
@@ -212,23 +209,6 @@ func makePoolStatusWeb(pool *PoolType, usage map[string]*PoolUsageType) *poolSta
 		statusWeb.Devs = append(statusWeb.Devs, devw)
 	}
 	return statusWeb
-}
-
-func severityFromUsedSpace(severities map[int]notifier.Severity, usedPercentage int) notifier.Severity {
-	maxlevel := 0
-	minlevel := 100
-	for level := range severities {
-		if (usedPercentage >= level) && level > maxlevel {
-			maxlevel = level
-		}
-		if level < minlevel {
-			minlevel = level
-		}
-	}
-	if maxlevel != 0 {
-		return severities[maxlevel]
-	} 
-	return severities[minlevel]
 }
 
 func statusHandler(w http.ResponseWriter, r *auth.AuthenticatedRequest) {

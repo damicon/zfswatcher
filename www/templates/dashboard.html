@@ -28,15 +28,15 @@
 				<td class="{{ .StateClass }}">{{ .State }}</td>
 				<td style="text-align: right">{{ nicenumber .Total }}</td>
 				<td style="text-align: right">{{ nicenumber .Used }}</td>
-				<td style="text-align: right">{{ .UsedPercent }}</td>
+				<td style="text-align: right">{{ .UsedPercent }}%</td>
 				<td style="text-align: right">{{ nicenumber .Avail }}</td>
-				<td style="text-align: right">{{ .AvailPercent }}</td>
+				<td style="text-align: right">{{ .AvailPercent }}%</td>
 				<td style="padding-left: 2em">
 					<a href="/usage/{{ .Name }}">
 					<div class="progress progress-zfswatcher-dashboard">
-					{{ if .UsedPercent }}
-						<div class="bar {{ .UsedClass }}" style="width: {{ .UsedPercent }}"></div>
-						<div class="bar	bar-success" style="width: {{ .AvailPercent }}"></div>
+					{{ if or .UsedPercent .AvailPercent }}
+						<div class="bar {{ .UsedClass }}" style="width: {{ .UsedPercent }}%"></div>
+						<div class="bar	bar-success" style="width: {{ .AvailPercent }}%"></div>
 					{{ end }}
 					</div>
 					</a>
