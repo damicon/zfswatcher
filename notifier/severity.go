@@ -31,7 +31,7 @@ type Severity uint32
 
 const (
 	severity_MIN  Severity = 0
-	EMERG         Severity = 0
+	EMERG         Severity = 0 // this is unfortunate
 	ALERT         Severity = 1
 	CRIT          Severity = 2
 	ERR           Severity = 3
