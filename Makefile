@@ -68,7 +68,7 @@ install: zfswatcher
 			$(DESTDIR)$(sysconfdir)/zfs/zfswatcher.conf
 	install -c -m 644 doc/zfswatcher.8				\
 		$(DESTDIR)$(man8dir)/zfswatcher.8
-	cp -R www $(DESTDIR)$(datadir)/zfswatcher/www
+	cp -R www $(DESTDIR)$(datadir)/zfswatcher/
 
 # Make tarball:
 dist:
