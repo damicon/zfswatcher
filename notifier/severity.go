@@ -30,16 +30,17 @@ import (
 type Severity uint32
 
 const (
-	severity_MIN Severity = 0
-	EMERG        Severity = 0
-	ALERT        Severity = 1
-	CRIT         Severity = 2
-	ERR          Severity = 3
-	WARNING      Severity = 4
-	NOTICE       Severity = 5
-	INFO         Severity = 6
-	DEBUG        Severity = 7
-	severity_MAX Severity = 7
+	severity_MIN  Severity = 0
+	EMERG         Severity = 0
+	ALERT         Severity = 1
+	CRIT          Severity = 2
+	ERR           Severity = 3
+	WARNING       Severity = 4
+	NOTICE        Severity = 5
+	INFO          Severity = 6
+	DEBUG         Severity = 7
+	severity_MAX  Severity = 7
+	SEVERITY_NONE Severity = 8 // discard these messages
 )
 
 var severityStrings = []string{
@@ -51,6 +52,7 @@ var severityStrings = []string{
 	NOTICE:  "notice",
 	INFO:    "info",
 	DEBUG:   "debug",
+	SEVERITY_NONE:    "none",
 }
 
 var severityCodes = map[string]Severity{
@@ -64,6 +66,7 @@ var severityCodes = map[string]Severity{
 	"notice":  NOTICE,
 	"info":    INFO,
 	"debug":   DEBUG,
+	"none":    SEVERITY_NONE,
 }
 
 // public API

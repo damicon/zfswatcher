@@ -69,6 +69,9 @@ func (n *Notifier) dispatcher() {
 			case m.MsgType == MSGTYPE_FLUSH && out.flush == false:
 				continue
 			case m.Severity <= out.severity:
+				// the zero value of Severity is EMERG, thus
+				// this always forwards messages with
+				// undefined severity
 				select {
 				case out.ch <- m:
 				default:
@@ -113,20 +116,28 @@ func sanitizeMessageText(str string) string {
 	return strings.Replace(str, "\n", " ", -1)
 }
 
-func (n *Notifier) Send(s Severity, t string) error {
+func (n *Notifier) internal_send(msgtype MsgType, s Severity, t string) error {
+	if s == SEVERITY_NONE {
+		return nil // discard
+	}
 	if s < severity_MIN || s > severity_MAX {
 		return errors.New(`invalid "severity"`)
 	}
-	n.ch <- &Msg{Time: time.Now(), MsgType: MSGTYPE_MESSAGE, Severity: s, Text: sanitizeMessageText(t)}
+	n.ch <- &Msg{
+		Time:     time.Now(),
+		MsgType:  msgtype,
+		Severity: s,
+		Text:     sanitizeMessageText(t),
+	}
 	return nil
 }
 
+func (n *Notifier) Send(s Severity, t string) error {
+	return n.internal_send(MSGTYPE_MESSAGE, s, t)
+}
+
 func (n *Notifier) Attach(s Severity, t string) error {
-	if s < severity_MIN || s > severity_MAX {
-		return errors.New(`invalid "severity"`)
-	}
-	n.ch <- &Msg{Time: time.Now(), MsgType: MSGTYPE_ATTACHMENT, Severity: s, Text: t}
-	return nil
+	return n.internal_send(MSGTYPE_ATTACHMENT, s, t)
 }
 
 func (n *Notifier) Flush() {
