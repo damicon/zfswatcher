@@ -222,8 +222,8 @@ func checkZfsUsage(oldusage, newusage map[string]*PoolUsageType) {
 		if _, ok := newusage[pool]; !ok {
 			continue
 		}
-		ou := int(oldusage[pool].Used * 100 / (oldusage[pool].Avail + oldusage[pool].Used))
-		nu := int(newusage[pool].Used * 100 / (newusage[pool].Avail + newusage[pool].Used))
+		ou := oldusage[pool].GetUsedPercent()
+		nu := newusage[pool].GetUsedPercent()
 		if !(nu > ou) {
 			continue
 		}

@@ -101,9 +101,10 @@ type poolStatusWeb struct {
 	Devs         []devStatusWeb
 	Errors       string
 	Used         int64
-	UsedPercent  string
+	UsedPercent  int
+	UsedClass    string
 	Avail        int64
-	AvailPercent string
+	AvailPercent int
 	Total        int64
 }
 
@@ -173,11 +174,15 @@ func makePoolStatusWeb(pool *PoolType, usage map[string]*PoolUsageType) *poolSta
 	statusWeb.Total = -1
 	if u, ok := usage[pool.name]; ok {
 		statusWeb.Avail = u.Avail
-		statusWeb.AvailPercent = fmt.Sprintf("%.0f%%", float64(u.Avail*100)/float64(u.Avail+u.Used))
+		statusWeb.AvailPercent = u.GetAvailPercent()
 		statusWeb.Used = u.Used
-		statusWeb.UsedPercent = fmt.Sprintf("%.0f%%", float64(u.Used*100)/float64(u.Avail+u.Used))
+		usedPercent := u.GetUsedPercent()
+		statusWeb.UsedPercent = usedPercent
 		statusWeb.Total = u.Avail + u.Used
+		usedSeverity, _ := cfg.Severity.Usedspace.GetByPercentage(usedPercent)
+		statusWeb.UsedClass = cfg.Www.Usedstatecssclassmap[usedSeverity]
 	}
+
 	for n, dev := range pool.devs {
 		devw := devStatusWeb{
 			Name:       dev.name,

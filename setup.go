@@ -40,6 +40,9 @@ const CFGFILE = "/etc/zfs/zfswatcher.conf"
 // Global for configuration file.
 var cfgFile string
 
+// Points to the global current configuration.
+var cfg *cfgType
+
 // Holder for global configuration information. Filled in by "gcfg".
 type cfgType struct {
 	Main struct {
@@ -105,6 +108,7 @@ type cfgType struct {
 		Severitycssclassmap  severityToWwwClassMap
 		Poolstatecssclassmap stringToStringMap
 		Devstatecssclassmap  stringToStringMap
+		Usedstatecssclassmap severityToWwwClassMap
 	}
 	Wwwuser map[string]*struct {
 		Enable   bool
@@ -113,11 +117,6 @@ type cfgType struct {
 }
 
 type stringToStringMap map[string]string
-type stateToSeverityMap map[string]notifier.Severity
-type percentageToSeverityMap map[int]notifier.Severity
-
-// Points to the global current configuration.
-var cfg *cfgType
 
 // Implement fmt.Scanner interface.
 func (smapp *stringToStringMap) Scan(state fmt.ScanState, verb rune) error {
@@ -140,6 +139,8 @@ func (smapp *stringToStringMap) Scan(state fmt.ScanState, verb rune) error {
 	*smapp = smap
 	return nil
 }
+
+type stateToSeverityMap map[string]notifier.Severity
 
 // Implement fmt.Scanner interface on top of two other fmt.Scanner interfaces.
 func (ssmapp *stateToSeverityMap) Scan(state fmt.ScanState, verb rune) error {
@@ -169,6 +170,8 @@ func (ssmap stateToSeverityMap) getSeverity(str string) notifier.Severity {
 	return sev
 }
 
+type percentageToSeverityMap map[int]notifier.Severity
+
 // Implement fmt.Scanner interface.
 func (psmapp *percentageToSeverityMap) Scan(state fmt.ScanState, verb rune) error {
 	ssmap := stateToSeverityMap{}
@@ -178,7 +181,7 @@ func (psmapp *percentageToSeverityMap) Scan(state fmt.ScanState, verb rune) erro
 	}
 	psmap := make(percentageToSeverityMap)
 	for a, b := range ssmap {
-		if len(a) < 2 || a[len(a)-1] != '%' {
+		if len(a) < 2 || a[len(a)-1] != '%' || a[0] == '-' {
 			return errors.New(`invalid percentage entry "` + a + `"`)
 		}
 		var percentage int
@@ -189,6 +192,22 @@ func (psmapp *percentageToSeverityMap) Scan(state fmt.ScanState, verb rune) erro
 	}
 	*psmapp = psmap
 	return nil
+}
+
+// Get severity level based on used percentage level. 
+// Returns notifier.SEVERITY_NONE and ok = false if the percentage
+// does not reach any listed level.
+func (psmapp *percentageToSeverityMap) GetByPercentage(used int) (severity notifier.Severity, ok bool) {
+	maxlevel := -1
+	for level := range *psmapp {
+		if used >= level && level > maxlevel {
+			maxlevel = level
+		}
+	}
+	if maxlevel != -1 {
+		return (*psmapp)[maxlevel], true
+	}
+	return notifier.SEVERITY_NONE, false
 }
 
 // Check for and notify about configuration error.
