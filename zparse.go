@@ -42,6 +42,16 @@ type PoolUsageType struct {
 	Mountpoint    string
 }
 
+// Methods for calculating the percentage to make sure that the calculation
+// is made the same way everywhere. We use integers for simplicity.
+func (u *PoolUsageType) GetUsedPercent() int {
+	return int(u.Used * 100 / (u.Avail + u.Used))
+}
+
+func (u *PoolUsageType) GetAvailPercent() int {
+	return int(u.Avail * 100 / (u.Avail + u.Used))
+}
+
 // Parse "zfs list -H -o name,avail,used,usedsnap,usedds,usedrefreserv,usedchild,refer,mountpoint" command output.
 func parseZfsList(str string) map[string]*PoolUsageType {
 	usagemap := make(map[string]*PoolUsageType)
