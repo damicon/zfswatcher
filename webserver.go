@@ -84,7 +84,11 @@ func webServer() {
 	http.HandleFunc("/about/", authenticator.Wrap(aboutHandler))
 	http.HandleFunc("/locate/", authenticator.Wrap(locateHandler))
 
-	err = http.ListenAndServe(cfg.Www.Bind, nil)
+	if cfg.Www.Certfile != "" && cfg.Www.Keyfile != "" {
+		err = http.ListenAndServeTLS(cfg.Www.Bind, cfg.Www.Certfile, cfg.Www.Keyfile, nil)
+	} else {
+		err = http.ListenAndServe(cfg.Www.Bind, nil)
+	}
 	if err != nil {
 		notify.Printf(notifier.ERR, "error starting web server: %s", err)
 	}

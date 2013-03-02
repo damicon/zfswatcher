@@ -103,6 +103,8 @@ type cfgType struct {
 		Level                notifier.Severity
 		Logbuffer            int
 		Bind                 string
+		Certfile             string
+		Keyfile              string
 		Templatedir          string
 		Resourcedir          string
 		Severitycssclassmap  severityToWwwClassMap
