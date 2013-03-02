@@ -39,6 +39,8 @@ func (n *Notifier) loggerStdout(ch chan *Msg) {
 	}
 }
 
+// AddLoggerStdout adds a logger which outputs to the standard output.
+// This can be useful for running a program in debugging mode.
 func (n *Notifier) AddLoggerStdout(s Severity) error {
 	switch {
 	case s < severity_MIN || s > severity_MAX:

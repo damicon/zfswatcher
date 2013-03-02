@@ -77,6 +77,7 @@ func (n *Notifier) loggerFile(ch chan *Msg, filename string) {
 	}
 }
 
+// AddLoggerFile adds a file based logging output.
 func (n *Notifier) AddLoggerFile(s Severity, file string) error {
 	switch {
 	case s < severity_MIN || s > severity_MAX:

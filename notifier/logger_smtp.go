@@ -149,6 +149,8 @@ func (n *Notifier) loggerEmailSMTP(ch chan *Msg, server, username, password, fro
 	}
 }
 
+// AddLoggerEmailSMTP adds an e-mail logging output. The e-mails are sent
+// with ESMTP/SMTP whenever Flush() is called.
 func (n *Notifier) AddLoggerEmailSMTP(s Severity, server, user, pass, from, to, subject string, throttle time.Duration) error {
 	switch {
 	case s < severity_MIN || s > severity_MAX:

@@ -19,6 +19,7 @@
 // along with zfswatcher. If not, see <http://www.gnu.org/licenses/>.
 //
 
+// Notifier - Go logging package (syslog, file and e-mail)
 package notifier
 
 import (
@@ -97,12 +98,15 @@ type notifyOutput struct {
 	flush      bool
 }
 
+// Notifier is a logging subsystem instance which is running as a goroutine
+// and may have several different logging destinations.
 type Notifier struct {
 	ch  chan *Msg
 	out []notifyOutput
 	wg  *sync.WaitGroup
 }
 
+// New starts a new logging subsystem as a goroutine.
 func New() *Notifier {
 	ch := make(chan *Msg, chan_SIZE)
 	n := &Notifier{ch: ch, wg: &sync.WaitGroup{}}
@@ -132,22 +136,38 @@ func (n *Notifier) internal_send(msgtype MsgType, s Severity, t string) error {
 	return nil
 }
 
+// Send sends a message for logging.
 func (n *Notifier) Send(s Severity, t string) error {
 	return n.internal_send(MSGTYPE_MESSAGE, s, t)
 }
 
+// Attach sends an attachment for logging. Attachments are usually some
+// additional multi-line output which provide further insight into a
+// problem. Examples: stack trace in case of panic, parser input in case of
+// a parse error. Some logging destinations such as syslog do not support
+// logging attachments. For others attachments can be enabled or disabled
+// when setting up the logging destination.
 func (n *Notifier) Attach(s Severity, t string) error {
 	return n.internal_send(MSGTYPE_ATTACHMENT, s, t)
 }
 
+// Flush all buffered logging output. This should be called when the program
+// finishes "one round". Causes for example e-mails to be sent instead of
+// waiting for more log lines.
 func (n *Notifier) Flush() {
 	n.ch <- &Msg{Time: time.Now(), MsgType: MSGTYPE_FLUSH}
 }
 
+// Reopen log outputs. Should be called whenever log files have been rotated.
 func (n *Notifier) Reopen() {
 	n.ch <- &Msg{Time: time.Now(), MsgType: MSGTYPE_REOPEN}
 }
 
+// Close log outputs. Causes the outputs to be flushed and stops the
+// goroutines gracefully. Returns a channel which is closed when the
+// logging subsystem has shut down. The caller may choose to wait until
+// it is closed in case something takes a long time (such as sendind
+// an e-mail message).
 func (n *Notifier) Close() chan bool {
 	// close the message channel to tell the goroutines they should quit:
 	close(n.ch)
@@ -162,10 +182,12 @@ func (n *Notifier) Close() chan bool {
 	return closeC
 }
 
+// Printf is normal fmt.Printf which sends a log message.
 func (n *Notifier) Printf(s Severity, format string, v ...interface{}) {
 	n.Send(s, fmt.Sprintf(format, v...))
 }
 
+// Print is normal fmt.Print which sends a log message.
 func (n *Notifier) Print(s Severity, v ...interface{}) { n.Send(s, fmt.Sprint(v...)) }
 
 // func (n *Notifier) Println(s Severity, v ...interface{}) { n.Send(s, fmt.Sprintln(v...)) }

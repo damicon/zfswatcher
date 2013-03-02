@@ -28,6 +28,8 @@ func (n Notifier) loggerCallback(ch chan *Msg, f func(*Msg)) {
 	}
 }
 
+// AddLoggerCallback adds a log output which just calls back the given function
+// whenever there is a message to be logged.
 func (n *Notifier) AddLoggerCallback(s Severity, f func(*Msg)) error {
 	ch := make(chan *Msg, chan_SIZE)
 	n.wg.Add(1)

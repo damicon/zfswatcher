@@ -71,7 +71,9 @@ var severityCodes = map[string]Severity{
 
 // public API
 
-// Implement fmt.Scanner interface.
+// Scan implements fmt.Scanner interface. This makes it possible to use
+// fmt.Sscan*() functions to parse syslog facility codes. Also
+// "gcfg" package can parse them in configuration files.
 func (s *Severity) Scan(state fmt.ScanState, verb rune) error {
 	sevstr, err := state.Token(false, func(r rune) bool { return true })
 	if err != nil {
@@ -85,7 +87,7 @@ func (s *Severity) Scan(state fmt.ScanState, verb rune) error {
 	return nil
 }
 
-// Implement fmt.Stringer interface.
+// String implements fmt.Stringer interface.
 func (s Severity) String() string {
 	return severityStrings[s]
 }

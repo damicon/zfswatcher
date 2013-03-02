@@ -79,7 +79,9 @@ var syslogFacilityCodes = map[string]SyslogFacility{
 
 // public API
 
-// Implement fmt.Scanner interface.
+// Implement fmt.Scanner interface. This makes it possible to use fmt.Sscan*()
+// functions to parse syslog facility codes directly. Also "gcfg" package can
+// parse them in configuration files.
 func (f *SyslogFacility) Scan(state fmt.ScanState, verb rune) error {
 	facstr, err := state.Token(false, func(r rune) bool { return true })
 	if err != nil {

@@ -26,8 +26,7 @@ import (
 	"time"
 )
 
-// Messages passed in the channels:
-
+// A type of a message.
 type MsgType int
 
 const (
@@ -37,6 +36,7 @@ const (
 	MSGTYPE_REOPEN                    // re-open output file after log rotation etc
 )
 
+// A single message.
 type Msg struct {
 	Time     time.Time
 	MsgType  MsgType
@@ -44,23 +44,28 @@ type Msg struct {
 	Text     string
 }
 
-// Implement the fmt.Stringer interface.
+// String implements the fmt.Stringer interface. It returns the message as
+// a single string in human readable format.
 func (m *Msg) String() string {
 	return m.Time.Format(date_time_FORMAT) +
 		" [" + m.Severity.String() + "] " +
 		m.Text
 }
 
+// Strings returns the message in three separate strings.
 func (m *Msg) Strings() (date_time string, severity string, text string) {
 	return m.Time.Format(date_time_FORMAT), m.Severity.String(), m.Text
 }
 
+// TimeString is like String() but omits the date from the output.
 func (m *Msg) TimeString() string {
 	return m.Time.Format(time_FORMAT) +
 		" [" + m.Severity.String() + "] " +
 		m.Text
 }
 
+// SyslogString returns the message in a format suitable for
+// sending to BSD style syslogd.
 func (m *Msg) SyslogString(facility SyslogFacility, tag string) string {
 	return fmt.Sprintf("<%d>%s %s: %s",
 		uint32(m.Severity)|(uint32(facility)<<3),

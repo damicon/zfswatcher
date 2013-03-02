@@ -121,6 +121,7 @@ func (n *Notifier) loggerSyslog(ch chan *Msg, address string, facility SyslogFac
 	}
 }
 
+// AddLoggerSyslog adds a Unix syslog logging output.
 func (n *Notifier) AddLoggerSyslog(s Severity, address string, facility SyslogFacility) error {
 	switch {
 	case s < severity_MIN || s > severity_MAX:
