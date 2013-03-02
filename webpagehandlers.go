@@ -26,9 +26,7 @@ import (
 	auth "github.com/abbot/go-http-auth"
 	"github.com/damicon/zfswatcher/notifier"
 	"html/template"
-	"math/rand"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 )
