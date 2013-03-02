@@ -45,7 +45,8 @@ VERSION		= `fgrep VERSION version.go | cut -d\" -f2`
 # Rules:
 all: zfswatcher
 
-zfswatcher: zfswatcher.go leds.go setup.go util.go version.go webserver.go zparse.go \
+zfswatcher: zfswatcher.go leds.go setup.go util.go version.go webserver.go \
+	webpagehandlers.go zparse.go \
 	osutil_linux.go osutil_freebsd.go osutil_solaris.go
 	GOPATH=$(GOPATH) $(GO) build -o $@
 
