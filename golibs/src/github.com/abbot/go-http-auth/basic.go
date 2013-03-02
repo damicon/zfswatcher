@@ -86,3 +86,13 @@ func (a *BasicAuth) Wrap(wrapped AuthenticatedHandlerFunc) http.HandlerFunc {
 func NewBasicAuthenticator(realm string, secrets SecretProvider) *BasicAuth {
 	return &BasicAuth{Realm: realm, Secrets: secrets}
 }
+
+func (a *BasicAuth) WrapHandler(wrapped http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if username := a.CheckAuth(r); username == "" {
+			a.RequireAuth(w, r)
+		} else {
+			wrapped.ServeHTTP(w, r)
+		}
+	})
+}

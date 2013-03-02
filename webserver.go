@@ -72,7 +72,9 @@ func webServer() {
 	http.Handle("/resources/",
 		http.StripPrefix("/resources",
 			noDirListing(
-				http.FileServer(http.Dir(cfg.Www.Resourcedir)))))
+				authenticator.WrapHandler(
+					http.FileServer(
+						http.Dir(cfg.Www.Resourcedir))))))
 
 	http.HandleFunc("/", authenticator.Wrap(dashboardHandler))
 	http.HandleFunc("/status/", authenticator.Wrap(statusHandler))
