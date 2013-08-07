@@ -8,7 +8,7 @@ Homepage: http://zfswatcher.damicon.fi/
 
 Package: zfswatcher
 Architecture: amd64
-Depends: zfs | ubuntu-zfs, ${shlibs:Depends}, ${misc:Depends}
+Depends: zfs | ubuntu-zfs | debian-zfs, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ledmon
 Description: ZFS pool monitoring and notification daemon
  Zfswatcher is ZFS pool monitoring and notification daemon

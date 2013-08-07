@@ -1,3 +1,9 @@
+zfswatcher (0.03-2) unstable; urgency=low
+
+  * Added "debian-zfs" as an alternative dependency.
+
+ -- Janne Snabb <snabb@epipe.com>  Wed, 07 Aug 2013 21:23:37 +0300
+
 zfswatcher (0.03-1) unstable; urgency=low
 
   * New version 0.03
