@@ -1,6 +1,14 @@
 zfswatcher
 ==========
 
+Unmaintained
+------------
+
+NOTE: This project is unmaintained. There is a more active fork available
+at the following URL: https://github.com/rouben/zfswatcher
+
+***
+
 ZFS pool monitoring and notification daemon.
 
 Please see the project web site for general information about features,
